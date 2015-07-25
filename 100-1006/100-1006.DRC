@@ -1,0 +1,32 @@
+Protel Design System Design Rule Check
+PCB File : c:\projects\powers~1\100-1006.PCB
+NET File : c:\projects\powers~1\power.net
+Date     : 23-Aug-2001
+Time     : 18:28:18
+
+
+Clearances
+  Arc        : 6mil
+  Fill       : 6mil
+  Pad        : 6mil
+  Track      : 6mil
+  Text       : 6mil
+  Via        : 6mil
+  Large Comp : 50mil
+  Small Comp : 20mil
+
+
+Do Missing Component Errors : Off
+Do Missing Pin Errors       : Off
+Do Extra Pin Errors         : On
+Do Extra UnNamed Pin Errors : Off
+Do Extra Net Errors         : On
+Do Extra Component Errors   : Off
+Do Split Net Errors         : On
+Do Clearance Errors         : On
+Do Component Clearances     : Off
+Do Component Pattern Errors : Off
+Do Component Value Errors   : Off
+
+
+Time Elapsed : 00:01:31

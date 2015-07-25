@@ -1,0 +1,20 @@
+---------------------------------------------------------------------------
+NC Drill File Report For :  C:\PROJECTS\POWERS~1\POWSUP.PCB   11-Aug-2001  12:15:46
+---------------------------------------------------------------------------
+
+
+
+Layer Pair : Top - Bottom
+ASCII File : c:\projects\powers~1\100-1006.TXT
+EIA File   : c:\projects\powers~1\100-1006.DRL
+
+Tool         Hole Size          Hole Count        Tool Travel
+---------------------------------------------------------------------------
+T1        36mil (0.9144mm)         6         6.481 Inch (164.619 mm)
+T2        55mil (1.397mm)          36        26.263 Inch (667.088 mm)
+T3        70mil (1.778mm)          16        13.764 Inch (349.593 mm)
+T4        140mil (3.556mm)         22        30.893 Inch (784.679 mm)
+---------------------------------------------------------------------------
+Totals                             80        77.401 Inch (1965.979 mm)
+
+Total Processing Time : 00:00:00

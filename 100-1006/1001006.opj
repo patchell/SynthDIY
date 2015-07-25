@@ -1,0 +1,41 @@
+(ExpressProject ""
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (File ".\1001006.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (NoModify))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (PartMRUSelector)
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1006\1001006.dsn")
+      (Path "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1006\1001006.dsn"
+         "SCHEMATIC1")
+      (Select "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1006\1001006.dsn"
+         "SCHEMATIC1" "PAGE1"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -4 -23 0 200 0 419"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 44 866 44 492")
+        (Scroll "737 476")
+        (Zoom "100")
+        (Occurrence "/"))
+      (Path
+         "C:\DOCUMENTS AND SETTINGS\JIM PATCHELL\MY DOCUMENTS\PROJECTS\SYNTHMOD\100-1006\1001006.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1"))))

@@ -1,0 +1,23 @@
+Power Supply Board  Revised: Monday, August 13, 2001
+100-1006          Revision: NC
+
+Drawn by Jim Patchell
+
+
+
+
+
+Bill Of Materials         August 13,2001      19:59:54	Page1
+
+Item	Quantity	Reference	Part	Mouser Part Number
+______________________________________________
+
+1	2	C1,C3	4700uF	140-XRL35V4700
+2	3	C2,C4,C6	10uF	140-XRL25V10
+3	1	C5	10000uF	140-XRL16V10000
+4	12	D1,D2,D3,D4,D5,D6,D7,D8,	1N4004	625-1N4004
+		D9,D10,D11,D12
+5	4	JP1,JP2,JP3,JP4	HEADER 4	538-26-48-1245
+6	1	U1	LM7815	511-L7815CT
+7	1	U2	LM7915	511-L7915CT
+8	1	U3	LM7805	511-L7805CT
