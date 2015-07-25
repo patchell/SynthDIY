@@ -1,0 +1,57 @@
+(ExpressProject "Design1"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (NoModify)
+    (File ".\frontpanel.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (ANNOTATE_Scope "0")
+    (ANNOTATE_Mode "1")
+    (ANNOTATE_Action "0")
+    (ANNOTATE_Reset_References_to_1 "FALSE")
+    (ANNOTATE_No_Page_Number_Change "FALSE")
+    (ANNOTATE_Property_Combine "{Value}{Source Package}"))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (PartMRUSelector
+    (GND
+      (LibraryName
+         "C:\DOCUMENTS AND SETTINGS\JIM PATCHELL\MY DOCUMENTS\PROJECTS\ORCADLIBS\SYNTH-DIY.OLB")
+      (DeviceIndex "0"))
+    (PHONEJACK
+      (FullPartName "PHONEJACK.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (POT
+      (FullPartName "POT.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    ("HEADER 10X2"
+      (FullPartName "HEADER 10X2.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0")))
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Select "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1003\frontpanel.dsn"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -4 -23 20 220 117 536"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -4 -23 66 888 66 514")
+        (Scroll "0 0")
+        (Zoom "30")
+        (Occurrence "/"))
+      (Path
+         "C:\DOCUMENTS AND SETTINGS\JIM PATCHELL\MY DOCUMENTS\PROJECTS\SYNTHMOD\100-1003\FRONTPANEL.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1"))))
