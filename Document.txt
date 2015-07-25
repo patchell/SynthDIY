@@ -1,0 +1,105 @@
+100-1001......Synth Module Board.............................DONE
+100-1002......Diode Wave Shaper..............................DONE
+100-1003......Vocal Filter...................................DONE
+100-1004......Voltage Controlled ADSR
+100-1005......Simple 8x2 sequencer...........................DONE
+100-1006......+/- 15, +5 Volt Power Supply...................DONE
+100-1007......VCO Sine,Triangle,Saw,Pulse,Suboctave..........DONE
+100-1008......Multi Segment Envelope Generator...............DONE
+100-1009......VCF/Mixer Mulitmode Filter/6 in 1 out Mixer....DONE
+100-1010......Mikado Board 1
+100-1011......Patern Generator...............................DONE
+100-1012......Top Octave Generator
+100-1013......Mikado Board 2
+100-1014......Mikado Board 3
+100-1015......Logic Module-dual and-or.......................DONE
+100-1029......Voltage Controlled LFO
+100-1030......CV->Midi Converter
+100-1031......VCO Calibrator 
+100-1036......Logic Module-misc
+100-1037......Modular Sequencer-Decoder/Midi/Dividers 
+100-1040......Memory Module 
+100-1041......Logic Module- Adder/subtractor/registers.......DONE
+100-1042......Logic Module- Shifters/ADC/Clock...............DONE
+100-1044......Simple Strobe Tuner
+100-1045......Power Amplifier-Sub woofer/Satelites...........DONE
+100-1046......Power Amplifier-100 watts
+100-1047......Memory Module- Dacs/Decoders/And-Or-Xor
+100-1048......Loud Speaker Tester
+100-1050......MIDI->AC Controller
+100-1051......Four Pole Low Pass Filter
+100-1052......Four Pole Band Pass Filter
+100-1053......Four Pole Band Pass Filter
+100-1054......Vocal Filter II 
+100-1055......Keyboard Encoder Processor 
+100-1056......Spartan 3 SB to AVR STK500/501 
+100-1057......Multi Mode 4 pole fileter
+100-1058......Synth Module Board Jr.
+100-1059......Cheesy Synth Module Board
+100-1060......Polyphonic Symth Module Board
+100-1061......User Interface Board for Synth
+100-1062......Blackmer Synth Module Board (BMSMB) Board #1
+100-1063......Chord Generator
+100-1064......Quad Sample Hold
+100-1065......Quad Gate Delay,strummer
+100-1066......Simple Synth Board
+100-1067......Chesy Synth Module Board #1
+100-1068......Cheesy Synth Moudle Board #2
+100-1069......Blackmer Synth Module Board (BMSMB) Board #2
+100-1070......Gated Fixed Filter Bank  		(done)
+200-1002......Non-Linear CV Processor (diode wave shaper)....DONE
+200-1004......Voltage Controlled ADSR........................DONE
+200-1005......Sequencer
+200-1007......VCO Sine, Triangle,Saw,Pulse...................DONE
+200-1009......Voltage Controlled Multimode Filter............DONE
+200-1016......4in/1out mixer.................................DONE
+200-1017......Midi->CV converter.............................DONE
+200-1018......CV processor...................................DONE
+200-1019......VCA............................................DONE
+200-1020......Balanced Modulator.............................DONE
+200-1021......Noise Generator (Digital)......................DONE
+200-1022......Quantizer
+200-1023......Glide
+200-1024......Multiple.......................................DONE
+200-1025......Frequency Divider 2,3,4........................DONE
+200-1026......Trigger/Gate Delay
+200-1027......Envelope Follower
+200-1028......Clock to Midi Clock converter
+200-1029......Voltage Controlled LFO.........................DONE
+200-1030......Power Routing Board
+200-1031......Power Supply Board.............................DONE
+200-1032......Dual Jack......................................DONE
+200-1033......Tripple Jack
+200-1034......Quad Jack
+200-1035......Five Jack
+200-1038......Modular Sequencer Octal Pot Mux................DONE 
+200-1039......New Power Routing Board
+200-1043......Analog Selector Board 
+300-1001......Discrete OTA
+300-1049......Audio Interface to Spartan Starter Kit 
+500-1007......VCO Module
+500-1008......Multisegment (4) Envelope Generator Module     (done)
+500-1009......State Variable Fileter Module
+500-1017......Midi to CV converter  						(done)
+500-1019......VCA Module
+500-1023......Glide Module			(done)
+500-1029......LFO Module
+500-1047......Multimode 4 pole filter
+500-1063......Chord Generator 				(done)
+500-1064......Quad Sample Hold      		(done)
+500-1065......Quad Gate Delay,strummer 		(done)
+500-1070......Gated Fixed Filter Bank		(done as 100-1070)
+500-1071......Quad Pot Board, Alpha  		(done)
+500-1072......Quad Phone Jack Board     	(done)
+500-1073......Quad Banana Jack Board
+500-1074......Quad Jack, Alpha Pot Board  	(done)
+500-1075......Tripple Pot Board Alpha Pot, Jack board      (done)
+500-1076......Tripple Jack Board
+500-1077......Percussive Oscilator  		(done)
+500-1078......Tripple Pot, Tripple jack  	(done)
+500-1079......Temp Compensated Expo Converter (sink)
+500-1080......OTA module
+500-1081......5:1 Mixer Pot Board
+500-1082......Launchpad Sequencer Analog Board
+500-1083......Quad Illuminated shaft pots   
+500-1084......Wave Multiplier
