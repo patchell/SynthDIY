@@ -1,0 +1,45 @@
+(ExpressProject "panel"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (NoModify)
+    (File ".\panel.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (ANNOTATE_Scope "0")
+    (ANNOTATE_Mode "1")
+    (ANNOTATE_Action "0")
+    (ANNOTATE_Reset_References_to_1 "FALSE")
+    (ANNOTATE_No_Page_Number_Change "FALSE")
+    (ANNOTATE_Property_Combine "{Value}{Source Package}"))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (PartMRUSelector
+    ("SW SPST"
+      (FullPartName "SW SPST.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (PHONEJACK
+      (FullPartName "PHONEJACK.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (POT
+      (FullPartName "POT.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    ("HEADER 10X2"
+      (FullPartName "HEADER 10X2.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0")))
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Select "Design Resources" "C:\projects\SynthMod\100-1002\panel.dsn"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -6 -25 0 200 0 419"))
+      (Tab 0))))
