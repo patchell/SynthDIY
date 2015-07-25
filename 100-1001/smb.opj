@@ -1,0 +1,198 @@
+(ExpressProject "smb"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (NoModify)
+    (File ".\smb.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (ANNOTATE_Scope "0")
+    (ANNOTATE_Mode "1")
+    (ANNOTATE_Action "0")
+    (ANNOTATE_Reset_References_to_1 "FALSE")
+    (ANNOTATE_No_Page_Number_Change "FALSE")
+    (ANNOTATE_Property_Combine "{Value}{Source Package}")
+    (CrossRef_Scope "0")
+    (Crossref__Mode "0")
+    (CrossRef_Sorting "1")
+    (CrossRef_Destination_File "C:\PROJECTS\SMB\SMB.XRF")
+    (CrossRef_XY "FALSE")
+    (CrossRef_Unused "FALSE")
+    (XRF_View_Output "FALSE")
+    (Netlist_TAB "7")
+    (OTHER_Part_Value "{Value}")
+    (OTHER_Netlist_File "C:\PROJECTS\SMB\SMB.NET")
+    (OTHER_Netlist_File2 "C:\PROJECTS\SMB\SMB.CMP")
+    (OTHER_View_Output "FALSE")
+    (OTHER_View_Output2 "FALSE")
+    (OTHER_Formatter "tango.dll")
+    (OTHER_PCB_Footprint "{PCB Footprint}")
+    (OTHER_Switch0 "FALSE")
+    (OTHER_Switch1 "FALSE")
+    (OTHER_Switch2 "FALSE")
+    (OTHER_Switch3 "FALSE")
+    (OTHER_Switch4 "FALSE")
+    (OTHER_Switch5 "FALSE")
+    (OTHER_Switch6 "FALSE")
+    (BOM_Scope "0")
+    (BOM_Mode "0")
+    (BOM_Report_File "C:\PROJECTS\SMB\SMB.BOM")
+    (BOM_Merge_Include "FALSE")
+    (BOM_Property_Combine_7.0
+       "{Item}\t{Quantity}\t{Reference}\t{Value}\t{partno}")
+    (BOM_Header "Item\tQuantity\tReference\tPart\tPart Number")
+    (BOM_Include_File "C:\PROJECTS\SMB\SMB.INC")
+    (BOM_Include_File_Combine_7.0 "{Item}\t{Quantity}\t{Reference}\t{Value}")
+    (BOM_One_Part_Per_Line "FALSE")
+    (BOM_View_Output "FALSE"))
+  (Folder "Outputs"
+    (File ".\smb.xrf"
+      (Type "Report"))
+    (File ".\smb.net"
+      (Type "Report"))
+    (File ".\smb.bom"
+      (Type "Report")))
+  (Folder "Referenced Projects")
+  (PartMRUSelector
+    ("REG NEG"
+      (FullPartName "REG NEG.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TELETRAC.OLB")
+      (DeviceIndex "0"))
+    (R
+      (FullPartName "R.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (THAT120
+      (FullPartName "THAT120E.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TELETRAC.OLB")
+      (DeviceIndex "4"))
+    (MAT04
+      (FullPartName "MAT04E.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TELETRAC.OLB")
+      (DeviceIndex "4"))
+    ("GENERIC OPAMP"
+      (FullPartName "GENERIC OPAMP.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TELETRAC.OLB")
+      (DeviceIndex "0"))
+    (74HC05
+      (FullPartName "74HC05.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TTL.OLB")
+      (DeviceIndex "0"))
+    (DIODE
+      (FullPartName "DIODE.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    ("CAPACITOR POL"
+      (FullPartName "CAPACITOR POL.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (74HC14
+      (FullPartName "74HC14.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TTL.OLB")
+      (DeviceIndex "0"))
+    (LED
+      (FullPartName "LED.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (74HC4053
+      (FullPartName "74HC4053.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\CMOS.OLB")
+      (DeviceIndex "0"))
+    (74HC157
+      (FullPartName "74HC157.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TTL.OLB")
+      (DeviceIndex "0"))
+    ("HEADER 10X2"
+      (FullPartName "HEADER 10X2.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (74HC138
+      (FullPartName "74HC138.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TTL.OLB")
+      (DeviceIndex "0"))
+    (74HC541
+      (FullPartName "74HC541.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TTL.OLB")
+      (DeviceIndex "0"))
+    ("HEADER 5X2"
+      (FullPartName "HEADER 5X2.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (POT
+      (FullPartName "POT.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (CAP
+      (FullPartName "CAP.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (LF398
+      (FullPartName "LF398.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\ANALOG.OLB")
+      (DeviceIndex "0"))
+    ("HEADER 6"
+      (FullPartName "HEADER 6.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    ("GENERIC DUAL OPAMP"
+      (FullPartName "GENERIC DUAL OPAMP.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TELETRAC.OLB")
+      (DeviceIndex "0"))
+    (74HC573
+      (FullPartName "74HC573.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TTL.OLB")
+      (DeviceIndex "0"))
+    (NPN
+      (FullPartName "NPN.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0"))
+    (CA3280E
+      (FullPartName "CA3280E.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\TELETRAC.OLB")
+      (DeviceIndex "1"))
+    (CAP
+      (FullPartName "CAP.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\DEVICE.OLB")
+      (DeviceIndex "0")))
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1001\smb.dsn")
+      (Path "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1001\smb.dsn"
+         "MIDI")
+      (Path "Outputs")
+      (Select "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1001\smb.dsn"
+         "MIDI" "PAGE1"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -4 -23 120 379 120 570"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -4 -23 220 1832 220 872")
+        (Scroll "0 181")
+        (Zoom "100")
+        (Occurrence "/MIDI"))
+      (Path
+         "C:\DOCUMENTS AND SETTINGS\JIM PATCHELL\MY DOCUMENTS\PROJECTS\SYNTHMOD\100-1001\SMB.DSN")
+      (Schematic "MIDI")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -4 -23 176 1788 176 828")
+        (Scroll "0 0")
+        (Zoom "100")
+        (Occurrence "/VCO1"))
+      (Path
+         "C:\DOCUMENTS AND SETTINGS\JIM PATCHELL\MY DOCUMENTS\PROJECTS\SYNTHMOD\100-1001\SMB.DSN")
+      (Schematic "VCO1")
+      (Page "VCO1"))))

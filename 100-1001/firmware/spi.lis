@@ -1,0 +1,195 @@
+                        .module spi.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile C:\projects\SynthMod\100-1001\firmware\spi.c
+ 0000                   .dbfunc e InitSPI _InitSPI fV
+                        .even
+ 0000           _InitSPI::
+ 0000                   .dbline -1
+ 0000                   .dbline 19
+ 0000           ; /******************************************************************************
+ 0000           ; **
+ 0000           ; ** These are the routines for talking to the SPI port
+ 0000           ; **
+ 0000           ; ** The SPI port will output a 16 bit integer to the DAC
+ 0000           ; **  It will then latch the data into the appropriate DAC register
+ 0000           ; **
+ 0000           ; *******************************************************************************/
+ 0000           ; #include <io8515v.h>
+ 0000           ; #include <macros.h>
+ 0000           ; #include "smb.h"
+ 0000           ; 
+ 0000           ; /*******************************************************************************
+ 0000           ; **
+ 0000           ; ** This routine initializes the SPI port and gets it ready for use
+ 0000           ; **
+ 0000           ; *******************************************************************************/
+ 0000           ; void InitSPI(void)
+ 0000           ; {
+ 0000                   .dbline 20
+ 0000           ;       DDRB |= 0xb0;   /*      set SS pin to output    */
+ 0000 87B3              in R24,0x17
+ 0002 806B              ori R24,176
+ 0004 87BB              out 0x17,R24
+ 0006                   .dbline 21
+ 0006           ;       SPCR = SPI_SPCR_SPE | SPI_SPCR_CPHA | SPI_SPCR_MSTR;    /*      enable SPI port */      
+ 0006 84E5              ldi R24,84
+ 0008 8DB9              out 0xd,R24
+ 000A                   .dbline 22
+ 000A           ;       MCUCR |= 0x80;  /*      enable external memory  */
+ 000A 85B7              in R24,0x35
+ 000C 8068              ori R24,128
+ 000E 85BF              out 0x35,R24
+ 0010                   .dbline -2
+ 0010                   .dbline 23
+ 0010           ; }
+ 0010           L1:
+ 0010                   .dbline 0 ; func end
+ 0010 0895              ret
+ 0012                   .dbend
+ 0012                   .dbfunc e PortFull _PortFull fI
+ 0012           ;              a -> R18
+ 0012           ;         retval -> R16,R17
+                        .even
+ 0012           _PortFull::
+ 0012                   .dbline -1
+ 0012                   .dbline 31
+ 0012           ; 
+ 0012           ; /*******************************************************************************
+ 0012           ; ** Wait for data to exit from SPI port
+ 0012           ; ** Returns true while data is still transmiting
+ 0012           ; *******************************************************************************/
+ 0012           ; 
+ 0012           ; int PortFull(void)
+ 0012           ; {
+ 0012                   .dbline 33
+ 0012           ;       char a;
+ 0012           ;       int retval=0;
+ 0012 0027              clr R16
+ 0014 1127              clr R17
+ 0016                   .dbline 34
+ 0016           ;       a = SPSR;
+ 0016 2EB1              in R18,0xe
+ 0018                   .dbline 35
+ 0018           ;       if(a & 0x80) retval = 1;
+ 0018 27FD              sbrc R18,7
+ 001A                   .dbline 35
+ 001A 01E0              ldi R16,1
+ 001C           L3:
+ 001C                   .dbline 36
+ 001C           ;       return retval;
+ 001C                   .dbline -2
+ 001C           L2:
+ 001C                   .dbline 0 ; func end
+ 001C 0895              ret
+ 001E                   .dbsym r a 18 c
+ 001E                   .dbsym r retval 16 I
+ 001E                   .dbend
+                        .area lit(rom, con, rel)
+ 0000           _DacLUT:
+ 0000 00A0              .word -24576
+ 0002 00A4              .word -23552
+ 0004 00A8              .word -22528
+ 0006 00AC              .word -21504
+ 0008 00B0              .word -20480
+ 000A 00B4              .word -19456
+ 000C 00B8              .word -18432
+ 000E 00BC              .word -17408
+ 0010                   .dbsym s DacLUT _DacLUT A[16:8]kI
+                        .area text(rom, con, rel)
+ 001E                   .dbfile C:\projects\SynthMod\100-1001\firmware\spi.c
+ 001E                   .dbfunc e SendData _SendData fV
+ 001E           ;        convert -> y+0
+ 001E           ;           port -> R20,R21
+ 001E           ;              d -> R22,R23
+                        .even
+ 001E           _SendData::
+ 001E 00D0              rcall push_gset2
+ 0020 422F              mov R20,R18
+ 0022 532F              mov R21,R19
+ 0024 602F              mov R22,R16
+ 0026 712F              mov R23,R17
+ 0028 2297              sbiw R28,2
+ 002A                   .dbline -1
+ 002A                   .dbline 55
+ 002A           ; }
+ 002A           ; 
+ 002A           ; /*******************************************************************************
+ 002A           ; This routine sends data d to DAC port port
+ 002A           ; *******************************************************************************/
+ 002A           ; static const int DacLUT[8] = {
+ 002A           ;       0xa000,
+ 002A           ;       0xa400,
+ 002A           ;       0xa800,
+ 002A           ;       0xac00,
+ 002A           ;       0xb000,
+ 002A           ;       0xb400,
+ 002A           ;       0xb800,
+ 002A           ;       0xbc00
+ 002A           ; };
+ 002A           ; 
+ 002A           ; 
+ 002A           ; void SendData(int d,int port)
+ 002A           ; {
+ 002A                   .dbline 60
+ 002A           ;       union {
+ 002A           ;               int v;
+ 002A           ;               char b[2];
+ 002A           ;       }convert;
+ 002A           ;       convert.v = d;
+ 002A 7983              std y+1,R23
+ 002C 6883              std y+0,R22
+ 002E                   .dbline 61
+ 002E           ;       SPDR = convert.b[1];    /*      get MSB of data */
+ 002E 2980              ldd R2,y+1
+ 0030 2FB8              out 0xf,R2
+ 0032           L8:
+ 0032                   .dbline 62
+ 0032           L9:
+ 0032                   .dbline 62
+ 0032           ;       while(!PortFull());                     /*      wait for data to be transmitted */
+ 0032 EFDF              rcall _PortFull
+ 0034 0030              cpi R16,0
+ 0036 0107              cpc R16,R17
+ 0038 E1F3              breq L8
+ 003A           X0:
+ 003A                   .dbline 63
+ 003A           ;       SPDR = convert.b[0];                    /*      get LSB of data */
+ 003A 2880              ldd R2,y+0
+ 003C 2FB8              out 0xf,R2
+ 003E           L11:
+ 003E                   .dbline 64
+ 003E           L12:
+ 003E                   .dbline 64
+ 003E           ;       while(!PortFull());             /*      wait for data to be transmitted */
+ 003E E9DF              rcall _PortFull
+ 0040 0030              cpi R16,0
+ 0042 0107              cpc R16,R17
+ 0044 E1F3              breq L11
+ 0046           X1:
+ 0046                   .dbline 65
+ 0046           ;       *((volatile char *)DacLUT[port]) = 0;   //dummy write to load DAC       */      
+ 0046 80E0              ldi R24,<_DacLUT
+ 0048 90E0              ldi R25,>_DacLUT
+ 004A 042F              mov R16,R20
+ 004C 152F              mov R17,R21
+ 004E 000F              lsl R16
+ 0050 111F              rol R17
+ 0052 080F              add R16,R24
+ 0054 191F              adc R17,R25
+ 0056 00D0              rcall lpm16
+ 0058 E02F              mov R30,R16
+ 005A F12F              mov R31,R17
+ 005C 2224              clr R2
+ 005E 2082              std z+0,R2
+ 0060                   .dbline -2
+ 0060                   .dbline 66
+ 0060           ; }
+ 0060           L5:
+ 0060 2296              adiw R28,2
+ 0062 00D0              rcall pop_gset2
+ 0064                   .dbline 0 ; func end
+ 0064 0895              ret
+ 0066                   .dbsym l convert 0 X
+ 0066                   .dbsym r port 20 I
+ 0066                   .dbsym r d 22 I
+ 0066                   .dbend

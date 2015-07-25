@@ -1,0 +1,22 @@
+---------------------------------------------------------------------------
+NC Drill File Report For :  c:\projects\smb\hsmb.PCB   2-Jul-2000   21:35:17
+---------------------------------------------------------------------------
+
+
+
+Layer Pair : Top - Bottom
+ASCII File : c:\projects\smb\hsmb.TXT
+EIA File   : c:\projects\smb\hsmb.DRL
+
+Tool         Hole Size          Hole Count        Tool Travel
+---------------------------------------------------------------------------
+T1        32mil (0.8128mm)         192       92.815 Inch (2357.498 mm)
+T2        36mil (0.9144mm)         4659      856.865 Inch (21764.374 mm)
+T3        42mil (1.0668mm)         24        26.867 Inch (682.418 mm)
+T4        50mil (1.27mm)           6         18.080 Inch (459.237 mm)
+T5        70mil (1.778mm)          6         11.051 Inch (280.699 mm)
+T6        140mil (3.556mm)         28        82.766 Inch (2102.247 mm)
+---------------------------------------------------------------------------
+Totals                             4915      1088.444 Inch (27646.471 mm)
+
+Total Processing Time : 00:00:03

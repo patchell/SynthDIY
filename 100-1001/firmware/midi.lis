@@ -1,0 +1,1669 @@
+                        .module midi.c
+                        .area vector(rom, abs)
+                        .org 20
+ 0014 9EC0              rjmp _iTxd
+                        .org 18
+ 0012 4FC0              rjmp _iRxd
+                        .org 14
+ 000E 5CC1              rjmp _iTimer
+                        .area text(rom, con, rel)
+ 0000                   .dbfile C:\projects\SynthMod\100-1001\firmware\midi.c
+ 0000                   .dbfunc e InitUart _InitUart fV
+ 0000           ;              i -> R20,R21
+ 0000           ;           baud -> R16,R17
+                        .even
+ 0000           _InitUart::
+ 0000 00D0              rcall push_gset1
+ 0002                   .dbline -1
+ 0002                   .dbline 32
+ 0002           ; /*******************************************************************************
+ 0002           ;       Midi.c
+ 0002           ; 
+ 0002           ;       These are the functions that provide the interface to the midi port
+ 0002           ; 
+ 0002           ; *******************************************************************************/
+ 0002           ; 
+ 0002           ; #include <io8515v.h>
+ 0002           ; #include <macros.h>
+ 0002           ; #include "smb.h"
+ 0002           ; #include "midi.h"
+ 0002           ; 
+ 0002           ; #pragma interrupt_handler iTxd:11 
+ 0002           ; #pragma interrupt_handler iRxd:iv_UART_RX
+ 0002           ; #pragma interrupt_handler iTimer:iv_TIMER0_OVF
+ 0002           ; 
+ 0002           ; char GateShadow;
+ 0002           ; 
+ 0002           ; typedef struct {
+ 0002           ;       volatile int head;
+ 0002           ;       volatile int tail;
+ 0002           ;       volatile int nchar;
+ 0002           ;       volatile int size;
+ 0002           ; }IODESC;
+ 0002           ; 
+ 0002           ; volatile IODESC txdesc;
+ 0002           ; char txbuff[32];
+ 0002           ; volatile IODESC rxdesc;
+ 0002           ; char rxbuff[32];
+ 0002           ; 
+ 0002           ; void InitUart(int baud)
+ 0002           ; {
+ 0002                   .dbline 35
+ 0002           ;       int i;
+ 0002           ; 
+ 0002           ;       UCR |= 0x18;    /*      enable uart rec and xmit        */
+ 0002 8AB1              in R24,0xa
+ 0004 8861              ori R24,24
+ 0006 8AB9              out 0xa,R24
+ 0008                   .dbline 36
+ 0008           ;       UBRR = baud;
+ 0008 09B9              out 0x9,R16
+ 000A                   .dbline 37
+ 000A           ;       txdesc.head = 0;        /*      initialize transmit descriptor  */
+ 000A 2224              clr R2
+ 000C 3324              clr R3
+ 000E 30924B00          sts _txdesc+1,R3
+ 0012 20924A00          sts _txdesc,R2
+ 0016                   .dbline 38
+ 0016           ;       txdesc.tail = 0;
+ 0016 30924D00          sts _txdesc+2+1,R3
+ 001A 20924C00          sts _txdesc+2,R2
+ 001E                   .dbline 39
+ 001E           ;       txdesc.nchar = 0;
+ 001E 30924F00          sts _txdesc+4+1,R3
+ 0022 20924E00          sts _txdesc+4,R2
+ 0026                   .dbline 40
+ 0026           ;       txdesc.size = 32;
+ 0026 80E2              ldi R24,32
+ 0028 90E0              ldi R25,0
+ 002A 90935100          sts _txdesc+6+1,R25
+ 002E 80935000          sts _txdesc+6,R24
+ 0032                   .dbline 41
+ 0032           ;       rxdesc.head = 0;        /*      initialize receiever descriptor */
+ 0032 30922300          sts _rxdesc+1,R3
+ 0036 20922200          sts _rxdesc,R2
+ 003A                   .dbline 42
+ 003A           ;       rxdesc.tail = 0;
+ 003A 30922500          sts _rxdesc+2+1,R3
+ 003E 20922400          sts _rxdesc+2,R2
+ 0042                   .dbline 43
+ 0042           ;       rxdesc.size = 32;
+ 0042 90932900          sts _rxdesc+6+1,R25
+ 0046 80932800          sts _rxdesc+6,R24
+ 004A                   .dbline 44
+ 004A           ;       rxdesc.nchar = 0;
+ 004A 30922700          sts _rxdesc+4+1,R3
+ 004E 20922600          sts _rxdesc+4,R2
+ 0052                   .dbline 45
+ 0052           ;       for(i=0;i<32;++i)
+ 0052 4427              clr R20
+ 0054 5527              clr R21
+ 0056           L9:
+ 0056                   .dbline 46
+ 0056                   .dbline 47
+ 0056 80E0              ldi R24,<_txbuff
+ 0058 90E0              ldi R25,>_txbuff
+ 005A E42F              mov R30,R20
+ 005C F52F              mov R31,R21
+ 005E E80F              add R30,R24
+ 0060 F91F              adc R31,R25
+ 0062 8FE6              ldi R24,111
+ 0064 8083              std z+0,R24
+ 0066                   .dbline 48
+ 0066 80E0              ldi R24,<_rxbuff
+ 0068 90E0              ldi R25,>_rxbuff
+ 006A E42F              mov R30,R20
+ 006C F52F              mov R31,R21
+ 006E E80F              add R30,R24
+ 0070 F91F              adc R31,R25
+ 0072 89E6              ldi R24,105
+ 0074 8083              std z+0,R24
+ 0076                   .dbline 49
+ 0076           L10:
+ 0076                   .dbline 45
+ 0076 4F5F              subi R20,255  ; offset = 1
+ 0078 5F4F              sbci R21,255
+ 007A                   .dbline 45
+ 007A 4032              cpi R20,32
+ 007C E0E0              ldi R30,0
+ 007E 5E07              cpc R21,R30
+ 0080 54F3              brlt L9
+ 0082                   .dbline -2
+ 0082                   .dbline 50
+ 0082           ;       {
+ 0082           ;               txbuff[i] = 'o';
+ 0082           ;               rxbuff[i] = 'i';
+ 0082           ;       }
+ 0082           ; }
+ 0082           L2:
+ 0082 00D0              rcall pop_gset1
+ 0084                   .dbline 0 ; func end
+ 0084 0895              ret
+ 0086                   .dbsym r i 20 I
+ 0086                   .dbsym r baud 16 I
+ 0086                   .dbend
+ 0086                   .dbfunc e Disable _Disable fV
+                        .even
+ 0086           _Disable::
+ 0086                   .dbline -1
+ 0086                   .dbline 53
+ 0086           ; 
+ 0086           ; void Disable(void)            /*      disable interrupts      */
+ 0086           ; {
+ 0086                   .dbline 54
+ 0086           ;       SREG &= ~0x80;
+ 0086 F894              bclr 7
+ 0088                   .dbline -2
+ 0088                   .dbline 55
+ 0088           ; }
+ 0088           L13:
+ 0088                   .dbline 0 ; func end
+ 0088 0895              ret
+ 008A                   .dbend
+ 008A                   .dbfunc e Enable _Enable fV
+                        .even
+ 008A           _Enable::
+ 008A                   .dbline -1
+ 008A                   .dbline 58
+ 008A           ; 
+ 008A           ; void Enable(void)             /* enable interrupts    */
+ 008A           ; {
+ 008A                   .dbline 59
+ 008A           ;       SREG |= 0x80;           
+ 008A 7894              bset 7
+ 008C                   .dbline -2
+ 008C                   .dbline 60
+ 008C           ; }
+ 008C           L14:
+ 008C                   .dbline 0 ; func end
+ 008C 0895              ret
+ 008E                   .dbend
+ 008E                   .dbfunc e EnableRxIRQ _EnableRxIRQ fV
+                        .even
+ 008E           _EnableRxIRQ::
+ 008E                   .dbline -1
+ 008E                   .dbline 63
+ 008E           ; 
+ 008E           ; void EnableRxIRQ(void)        
+ 008E           ; {
+ 008E                   .dbline 67
+ 008E           ;       /**************************
+ 008E           ;       ** Enable Receiver interrupts
+ 008E           ;       **************************/
+ 008E           ;       UCR |= 0x80;
+ 008E 579A              sbi 0xa,7
+ 0090                   .dbline -2
+ 0090                   .dbline 68
+ 0090           ; }
+ 0090           L15:
+ 0090                   .dbline 0 ; func end
+ 0090 0895              ret
+ 0092                   .dbend
+ 0092                   .dbfunc e DisableRxIRQ _DisableRxIRQ fV
+                        .even
+ 0092           _DisableRxIRQ::
+ 0092                   .dbline -1
+ 0092                   .dbline 71
+ 0092           ; 
+ 0092           ; void DisableRxIRQ(void)
+ 0092           ; {
+ 0092                   .dbline 75
+ 0092           ;       /**************************
+ 0092           ;       ** Disable Receirver interrupts
+ 0092           ;       **************************/
+ 0092           ;       UCR &= ~0x80;
+ 0092 5798              cbi 0xa,7
+ 0094                   .dbline -2
+ 0094                   .dbline 76
+ 0094           ; }
+ 0094           L16:
+ 0094                   .dbline 0 ; func end
+ 0094 0895              ret
+ 0096                   .dbend
+ 0096                   .dbfunc e EnableTxIRQ _EnableTxIRQ fV
+                        .even
+ 0096           _EnableTxIRQ::
+ 0096                   .dbline -1
+ 0096                   .dbline 79
+ 0096           ; 
+ 0096           ; void EnableTxIRQ(void)
+ 0096           ; {
+ 0096                   .dbline 80
+ 0096           ;       UCR |= 0x20;    /*      enable transmit data register empty interrupt   */
+ 0096 559A              sbi 0xa,5
+ 0098                   .dbline -2
+ 0098                   .dbline 81
+ 0098           ; }
+ 0098           L17:
+ 0098                   .dbline 0 ; func end
+ 0098 0895              ret
+ 009A                   .dbend
+ 009A                   .dbfunc e DisableTxIRQ _DisableTxIRQ fV
+                        .even
+ 009A           _DisableTxIRQ::
+ 009A                   .dbline -1
+ 009A                   .dbline 84
+ 009A           ; 
+ 009A           ; void DisableTxIRQ(void)
+ 009A           ; {
+ 009A                   .dbline 85
+ 009A           ;       UCR &= ~0x20;   /*      disable transmit data register empty interrupt  */
+ 009A 5598              cbi 0xa,5
+ 009C                   .dbline -2
+ 009C                   .dbline 86
+ 009C           ; }
+ 009C           L18:
+ 009C                   .dbline 0 ; func end
+ 009C 0895              ret
+ 009E                   .dbend
+ 009E                   .dbfunc e iRxd _iRxd fV
+ 009E           ;              c -> R16
+                        .even
+ 009E           _iRxd::
+ 009E 2A92              st -y,R2
+ 00A0 3A92              st -y,R3
+ 00A2 4A92              st -y,R4
+ 00A4 5A92              st -y,R5
+ 00A6 0A93              st -y,R16
+ 00A8 8A93              st -y,R24
+ 00AA 9A93              st -y,R25
+ 00AC EA93              st -y,R30
+ 00AE FA93              st -y,R31
+ 00B0 2FB6              in R2,0x3f
+ 00B2 2A92              st -y,R2
+ 00B4                   .dbline -1
+ 00B4                   .dbline 89
+ 00B4           ; 
+ 00B4           ; void iRxd(void)
+ 00B4           ; {
+ 00B4                   .dbline 94
+ 00B4           ;       /**************************
+ 00B4           ;       ** Interrupt handler for 
+ 00B4           ;       ** Receive Interrupts
+ 00B4           ;       **************************/
+ 00B4           ;       char c = UDR;   /*      read data from receive data reg */
+ 00B4 0CB1              in R16,0xc
+ 00B6                   .dbline 95
+ 00B6           ;       if(rxdesc.nchar < rxdesc.size)  /*      is there space to put char?     */
+ 00B6 20902800          lds R2,_rxdesc+6
+ 00BA 30902900          lds R3,_rxdesc+6+1
+ 00BE 40902600          lds R4,_rxdesc+4
+ 00C2 50902700          lds R5,_rxdesc+4+1
+ 00C6 4214              cp R4,R2
+ 00C8 5304              cpc R5,R3
+ 00CA 64F5              brge L20
+ 00CC                   .dbline 96
+ 00CC           ;       {
+ 00CC                   .dbline 97
+ 00CC           ;               rxbuff[rxdesc.head++] = c;      /*      put character into buffer       */
+ 00CC 20902200          lds R2,_rxdesc
+ 00D0 30902300          lds R3,_rxdesc+1
+ 00D4 822D              mov R24,R2
+ 00D6 932D              mov R25,R3
+ 00D8 0196              adiw R24,1
+ 00DA 90932300          sts _rxdesc+1,R25
+ 00DE 80932200          sts _rxdesc,R24
+ 00E2 80E0              ldi R24,<_rxbuff
+ 00E4 90E0              ldi R25,>_rxbuff
+ 00E6 E22D              mov R30,R2
+ 00E8 F32D              mov R31,R3
+ 00EA E80F              add R30,R24
+ 00EC F91F              adc R31,R25
+ 00EE 0083              std z+0,R16
+ 00F0                   .dbline 98
+ 00F0           ;               if(rxdesc.head == rxdesc.size) rxdesc.head = 0; /*      wrap head pointer       */
+ 00F0 20902800          lds R2,_rxdesc+6
+ 00F4 30902900          lds R3,_rxdesc+6+1
+ 00F8 40902200          lds R4,_rxdesc
+ 00FC 50902300          lds R5,_rxdesc+1
+ 0100 4214              cp R4,R2
+ 0102 5304              cpc R5,R3
+ 0104 31F4              brne L24
+ 0106                   .dbline 98
+ 0106 2224              clr R2
+ 0108 3324              clr R3
+ 010A 30922300          sts _rxdesc+1,R3
+ 010E 20922200          sts _rxdesc,R2
+ 0112           L24:
+ 0112                   .dbline 99
+ 0112 80912600          lds R24,_rxdesc+4
+ 0116 90912700          lds R25,_rxdesc+4+1
+ 011A 0196              adiw R24,1
+ 011C 90932700          sts _rxdesc+4+1,R25
+ 0120 80932600          sts _rxdesc+4,R24
+ 0124                   .dbline 100
+ 0124           L20:
+ 0124                   .dbline -2
+ 0124                   .dbline 101
+ 0124           ;               rxdesc.nchar++; /*      increment character count       */
+ 0124           ;       }       /*      otherwise, just drop character  */
+ 0124           ; }
+ 0124           L19:
+ 0124 2990              ld R2,y+
+ 0126 2FBE              out 0x3f,R2
+ 0128 F991              ld R31,y+
+ 012A E991              ld R30,y+
+ 012C 9991              ld R25,y+
+ 012E 8991              ld R24,y+
+ 0130 0991              ld R16,y+
+ 0132 5990              ld R5,y+
+ 0134 4990              ld R4,y+
+ 0136 3990              ld R3,y+
+ 0138 2990              ld R2,y+
+ 013A                   .dbline 0 ; func end
+ 013A 1895              reti
+ 013C                   .dbsym r c 16 c
+ 013C                   .dbend
+ 013C                   .dbfunc e iTxd _iTxd fV
+ 013C           ;              c -> R20
+                        .even
+ 013C           _iTxd::
+ 013C 00D0              rcall push_lset
+ 013E 00D0              rcall push_gset1
+ 0140                   .dbline -1
+ 0140                   .dbline 104
+ 0140           ; 
+ 0140           ; void iTxd(void)               /* interrupt handler for uart   */
+ 0140           ; {
+ 0140                   .dbline 107
+ 0140           ;       char c;
+ 0140           ; 
+ 0140           ;       c = (char)txbuff[txdesc.tail++];                /*      get character from buffer       */
+ 0140 20904C00          lds R2,_txdesc+2
+ 0144 30904D00          lds R3,_txdesc+2+1
+ 0148 822D              mov R24,R2
+ 014A 932D              mov R25,R3
+ 014C 0196              adiw R24,1
+ 014E 90934D00          sts _txdesc+2+1,R25
+ 0152 80934C00          sts _txdesc+2,R24
+ 0156 80E0              ldi R24,<_txbuff
+ 0158 90E0              ldi R25,>_txbuff
+ 015A E22D              mov R30,R2
+ 015C F32D              mov R31,R3
+ 015E E80F              add R30,R24
+ 0160 F91F              adc R31,R25
+ 0162 4081              ldd R20,z+0
+ 0164                   .dbline 108
+ 0164           ;       --txdesc.nchar;                                         /*      one less character to send      */
+ 0164 80914E00          lds R24,_txdesc+4
+ 0168 90914F00          lds R25,_txdesc+4+1
+ 016C 0197              sbiw R24,1
+ 016E 90934F00          sts _txdesc+4+1,R25
+ 0172 80934E00          sts _txdesc+4,R24
+ 0176                   .dbline 109
+ 0176           ;       if(txdesc.nchar == 0)                           /*      is xmit buffer empty?   */                              
+ 0176 20904E00          lds R2,_txdesc+4
+ 017A 30904F00          lds R3,_txdesc+4+1
+ 017E 2220              tst R2
+ 0180 19F4              brne L31
+ 0182 3320              tst R3
+ 0184 09F4              brne L31
+ 0186           X0:
+ 0186                   .dbline 110
+ 0186           ;               DisableTxIRQ();                                 /*      stop transmitting data  */
+ 0186 89DF              rcall _DisableTxIRQ
+ 0188           L31:
+ 0188                   .dbline 111
+ 0188           ;       if(txdesc.tail == txdesc.size) txdesc.tail = 0; /* wrap tail pointer    */
+ 0188 20905000          lds R2,_txdesc+6
+ 018C 30905100          lds R3,_txdesc+6+1
+ 0190 40904C00          lds R4,_txdesc+2
+ 0194 50904D00          lds R5,_txdesc+2+1
+ 0198 4214              cp R4,R2
+ 019A 5304              cpc R5,R3
+ 019C 31F4              brne L34
+ 019E                   .dbline 111
+ 019E 2224              clr R2
+ 01A0 3324              clr R3
+ 01A2 30924D00          sts _txdesc+2+1,R3
+ 01A6 20924C00          sts _txdesc+2,R2
+ 01AA           L34:
+ 01AA                   .dbline 112
+ 01AA           ;       UDR = c;
+ 01AA 4CB9              out 0xc,R20
+ 01AC                   .dbline -2
+ 01AC                   .dbline 113
+ 01AC           ; }
+ 01AC           L28:
+ 01AC 00D0              rcall pop_gset1
+ 01AE 00D0              rcall pop_lset
+ 01B0                   .dbline 0 ; func end
+ 01B0 1895              reti
+ 01B2                   .dbsym r c 20 c
+ 01B2                   .dbend
+ 01B2                   .dbfunc e GetC _GetC fI
+ 01B2           ;              c -> R20,R21
+                        .even
+ 01B2           _GetC::
+ 01B2 00D0              rcall push_gset1
+ 01B4                   .dbline -1
+ 01B4                   .dbline 116
+ 01B4           ; 
+ 01B4           ; int GetC(void)
+ 01B4           ; {
+ 01B4           L40:
+ 01B4                   .dbline 123
+ 01B4           L41:
+ 01B4                   .dbline 123
+ 01B4           ;       /*********************************
+ 01B4           ;       ** Get a character from the UART
+ 01B4           ;       ** If there is no character, wait
+ 01B4           ;       *********************************/
+ 01B4           ;       int c;
+ 01B4           ; 
+ 01B4           ;       while(rxdesc.nchar == 0);       /*      wait for character to apear in buffer   */
+ 01B4 20902600          lds R2,_rxdesc+4
+ 01B8 30902700          lds R3,_rxdesc+4+1
+ 01BC 2220              tst R2
+ 01BE 11F4              brne X1
+ 01C0 3320              tst R3
+ 01C2 C1F3              breq L40
+ 01C4           X1:
+ 01C4                   .dbline 124
+ 01C4           ;       Disable();                      /*      disable interrupts      */
+ 01C4 60DF              rcall _Disable
+ 01C6                   .dbline 125
+ 01C6           ;       c = (int)rxbuff[rxdesc.tail++];         /*      get character from buffer       */
+ 01C6 20902400          lds R2,_rxdesc+2
+ 01CA 30902500          lds R3,_rxdesc+2+1
+ 01CE 822D              mov R24,R2
+ 01D0 932D              mov R25,R3
+ 01D2 0196              adiw R24,1
+ 01D4 90932500          sts _rxdesc+2+1,R25
+ 01D8 80932400          sts _rxdesc+2,R24
+ 01DC 80E0              ldi R24,<_rxbuff
+ 01DE 90E0              ldi R25,>_rxbuff
+ 01E0 E22D              mov R30,R2
+ 01E2 F32D              mov R31,R3
+ 01E4 E80F              add R30,R24
+ 01E6 F91F              adc R31,R25
+ 01E8 4081              ldd R20,z+0
+ 01EA 5527              clr R21
+ 01EC                   .dbline 126
+ 01EC           ;       if(rxdesc.tail == rxdesc.size) rxdesc.tail = 0; /*      wrap tail pointer       */
+ 01EC 20902800          lds R2,_rxdesc+6
+ 01F0 30902900          lds R3,_rxdesc+6+1
+ 01F4 40902400          lds R4,_rxdesc+2
+ 01F8 50902500          lds R5,_rxdesc+2+1
+ 01FC 4214              cp R4,R2
+ 01FE 5304              cpc R5,R3
+ 0200 31F4              brne L45
+ 0202                   .dbline 126
+ 0202 2224              clr R2
+ 0204 3324              clr R3
+ 0206 30922500          sts _rxdesc+2+1,R3
+ 020A 20922400          sts _rxdesc+2,R2
+ 020E           L45:
+ 020E                   .dbline 127
+ 020E           ;       rxdesc.nchar--; /*      decrement number of chars in buffer     */
+ 020E 80912600          lds R24,_rxdesc+4
+ 0212 90912700          lds R25,_rxdesc+4+1
+ 0216 0197              sbiw R24,1
+ 0218 90932700          sts _rxdesc+4+1,R25
+ 021C 80932600          sts _rxdesc+4,R24
+ 0220                   .dbline 128
+ 0220           ;       Enable();
+ 0220 34DF              rcall _Enable
+ 0222                   .dbline 129
+ 0222           ;       return c;       /*      return fetched character        */      
+ 0222 042F              mov R16,R20
+ 0224 152F              mov R17,R21
+ 0226                   .dbline -2
+ 0226           L39:
+ 0226 00D0              rcall pop_gset1
+ 0228                   .dbline 0 ; func end
+ 0228 0895              ret
+ 022A                   .dbsym r c 20 I
+ 022A                   .dbend
+ 022A                   .dbfunc e PutC _PutC fV
+ 022A           ;              i -> R20,R21
+                        .even
+ 022A           _PutC::
+ 022A 00D0              rcall push_gset1
+ 022C 402F              mov R20,R16
+ 022E 512F              mov R21,R17
+ 0230                   .dbline -1
+ 0230                   .dbline 133
+ 0230           ; }
+ 0230           ; 
+ 0230           ; void PutC(int i)
+ 0230           ; {
+ 0230           L52:
+ 0230                   .dbline 134
+ 0230           L53:
+ 0230                   .dbline 134
+ 0230           ;       while(txdesc.nchar == txdesc.size);     /*      pend on buffer full     */
+ 0230 20905000          lds R2,_txdesc+6
+ 0234 30905100          lds R3,_txdesc+6+1
+ 0238 40904E00          lds R4,_txdesc+4
+ 023C 50904F00          lds R5,_txdesc+4+1
+ 0240 4214              cp R4,R2
+ 0242 5304              cpc R5,R3
+ 0244 A9F3              breq L52
+ 0246                   .dbline 135
+ 0246           ;       Disable();      /*      Disable interrupts      */
+ 0246 1FDF              rcall _Disable
+ 0248                   .dbline 136
+ 0248           ;       txbuff[txdesc.head++] = (char)i;        /*      put data into buffer    */
+ 0248 20904A00          lds R2,_txdesc
+ 024C 30904B00          lds R3,_txdesc+1
+ 0250 822D              mov R24,R2
+ 0252 932D              mov R25,R3
+ 0254 0196              adiw R24,1
+ 0256 90934B00          sts _txdesc+1,R25
+ 025A 80934A00          sts _txdesc,R24
+ 025E 80E0              ldi R24,<_txbuff
+ 0260 90E0              ldi R25,>_txbuff
+ 0262 E22D              mov R30,R2
+ 0264 F32D              mov R31,R3
+ 0266 E80F              add R30,R24
+ 0268 F91F              adc R31,R25
+ 026A 4083              std z+0,R20
+ 026C                   .dbline 137
+ 026C           ;       if(txdesc.head == txdesc.size) txdesc.head = 0; /*      wrap head pointer       */
+ 026C 20905000          lds R2,_txdesc+6
+ 0270 30905100          lds R3,_txdesc+6+1
+ 0274 40904A00          lds R4,_txdesc
+ 0278 50904B00          lds R5,_txdesc+1
+ 027C 4214              cp R4,R2
+ 027E 5304              cpc R5,R3
+ 0280 31F4              brne L57
+ 0282                   .dbline 137
+ 0282 2224              clr R2
+ 0284 3324              clr R3
+ 0286 30924B00          sts _txdesc+1,R3
+ 028A 20924A00          sts _txdesc,R2
+ 028E           L57:
+ 028E                   .dbline 138
+ 028E           ;       if(txdesc.nchar == 0)   /*      first char in buff?     */
+ 028E 20904E00          lds R2,_txdesc+4
+ 0292 30904F00          lds R3,_txdesc+4+1
+ 0296 2220              tst R2
+ 0298 19F4              brne L60
+ 029A 3320              tst R3
+ 029C 09F4              brne L60
+ 029E           X2:
+ 029E                   .dbline 139
+ 029E           ;               EnableTxIRQ();          /*      start transmit interrupt        */
+ 029E FBDE              rcall _EnableTxIRQ
+ 02A0           L60:
+ 02A0                   .dbline 140
+ 02A0           ;       txdesc.nchar++;
+ 02A0 80914E00          lds R24,_txdesc+4
+ 02A4 90914F00          lds R25,_txdesc+4+1
+ 02A8 0196              adiw R24,1
+ 02AA 90934F00          sts _txdesc+4+1,R25
+ 02AE 80934E00          sts _txdesc+4,R24
+ 02B2                   .dbline 141
+ 02B2           ;       Enable();       /*      enable interrupts       */      
+ 02B2 EBDE              rcall _Enable
+ 02B4                   .dbline -2
+ 02B4                   .dbline 142
+ 02B4           ; }
+ 02B4           L51:
+ 02B4 00D0              rcall pop_gset1
+ 02B6                   .dbline 0 ; func end
+ 02B6 0895              ret
+ 02B8                   .dbsym r i 20 I
+ 02B8                   .dbend
+ 02B8                   .dbfunc e iTimer _iTimer fV
+                        .even
+ 02B8           _iTimer::
+ 02B8 2A92              st -y,R2
+ 02BA 8A93              st -y,R24
+ 02BC 2FB6              in R2,0x3f
+ 02BE 2A92              st -y,R2
+ 02C0                   .dbline -1
+ 02C0                   .dbline 152
+ 02C0                   .dbline 156
+ 02C0 80EE              ldi R24,224
+ 02C2 82BF              out 0x32,R24
+ 02C4                   .dbline 157
+ 02C4 80910100          lds R24,_Counter
+ 02C8 8150              subi R24,1
+ 02CA 282E              mov R2,R24
+ 02CC 20920100          sts _Counter,R2
+ 02D0 8823              tst R24
+ 02D2 89F4              brne L65
+ 02D4                   .dbline 158
+ 02D4                   .dbline 159
+ 02D4 82E0              ldi R24,2
+ 02D6 20905200          lds R2,_GateShadow
+ 02DA 2826              eor R2,R24
+ 02DC 20925200          sts _GateShadow,R2
+ 02E0                   .dbline 160
+ 02E0 2094              com R2
+ 02E2 209200C4          sts 50176,R2
+ 02E6                   .dbline 161
+ 02E6 20905200          lds R2,_GateShadow
+ 02EA 209200C0          sts 49152,R2
+ 02EE                   .dbline 162
+ 02EE 20900000          lds R2,_CRV
+ 02F2 20920100          sts _Counter,R2
+ 02F6                   .dbline 163
+ 02F6           L65:
+ 02F6                   .dbline -2
+ 02F6                   .dbline 164
+ 02F6           ; 
+ 02F6           ; //--------------------------------------------------------------------------
+ 02F6           ; // Timer STuff...
+ 02F6           ; //--------------------------------------------------------------------------
+ 02F6           ; 
+ 02F6           ; unsigned char Counter;
+ 02F6           ; unsigned char CRV;
+ 02F6           ; 
+ 02F6           ; void iTimer(void)
+ 02F6           ; {
+ 02F6           ;       //-----------------------------------
+ 02F6           ;       //timer interrupt handler
+ 02F6           ;       //-----------------------------------
+ 02F6           ;       TCNT0 = ~31;
+ 02F6           ;       if(--Counter == 0)
+ 02F6           ;       {
+ 02F6           ;               GateShadow ^= 0x02;
+ 02F6           ;               LED_PORT = ~GateShadow;
+ 02F6           ;               GATE_PORT = GateShadow;
+ 02F6           ;               Counter = CRV;
+ 02F6           ;       }
+ 02F6           ; }
+ 02F6           L64:
+ 02F6 2990              ld R2,y+
+ 02F8 2FBE              out 0x3f,R2
+ 02FA 8991              ld R24,y+
+ 02FC 2990              ld R2,y+
+ 02FE                   .dbline 0 ; func end
+ 02FE 1895              reti
+ 0300                   .dbend
+ 0300                   .dbfunc e EnableTimerIrq _EnableTimerIrq fV
+                        .even
+ 0300           _EnableTimerIrq::
+ 0300                   .dbline -1
+ 0300                   .dbline 167
+ 0300           ; 
+ 0300           ; void EnableTimerIrq(void)
+ 0300           ; {
+ 0300                   .dbline 168
+ 0300           ;       TIMSK |= 0x02;  //enable timer interrupt
+ 0300 89B7              in R24,0x39
+ 0302 8260              ori R24,2
+ 0304 89BF              out 0x39,R24
+ 0306                   .dbline -2
+ 0306                   .dbline 169
+ 0306           ; }
+ 0306           L67:
+ 0306                   .dbline 0 ; func end
+ 0306 0895              ret
+ 0308                   .dbend
+ 0308                   .dbfunc e DisableTimerIrq _DisableTimerIrq fV
+                        .even
+ 0308           _DisableTimerIrq::
+ 0308                   .dbline -1
+ 0308                   .dbline 172
+ 0308           ; 
+ 0308           ; void DisableTimerIrq(void)
+ 0308           ; {
+ 0308                   .dbline 173
+ 0308           ;       TIMSK &= ~0x02; //disable timer interrupt
+ 0308 89B7              in R24,0x39
+ 030A 8D7F              andi R24,253
+ 030C 89BF              out 0x39,R24
+ 030E                   .dbline -2
+ 030E                   .dbline 174
+ 030E           ; }
+ 030E           L68:
+ 030E                   .dbline 0 ; func end
+ 030E 0895              ret
+ 0310                   .dbend
+ 0310                   .dbfunc e InitTimer _InitTimer fV
+                        .even
+ 0310           _InitTimer::
+ 0310                   .dbline -1
+ 0310                   .dbline 177
+ 0310           ; 
+ 0310           ; void InitTimer(void)
+ 0310           ; {
+ 0310                   .dbline 178
+ 0310           ;       TCCR0 = 5;      //system clock divided by 1024
+ 0310 85E0              ldi R24,5
+ 0312 83BF              out 0x33,R24
+ 0314                   .dbline 179
+ 0314           ;       TCNT0 = ~31;
+ 0314 80EE              ldi R24,224
+ 0316 82BF              out 0x32,R24
+ 0318                   .dbline 180
+ 0318           ;       Counter = 31;
+ 0318 8FE1              ldi R24,31
+ 031A 80930100          sts _Counter,R24
+ 031E                   .dbline 181
+ 031E           ;       CRV = 31;
+ 031E 80930000          sts _CRV,R24
+ 0322                   .dbline -2
+ 0322                   .dbline 182
+ 0322           ; }
+ 0322           L69:
+ 0322                   .dbline 0 ; func end
+ 0322 0895              ret
+ 0324                   .dbend
+ 0324                   .dbfunc e Delay _Delay fV
+ 0324           ;              a -> R16
+ 0324           ;              b -> R18
+                        .even
+ 0324           _Delay::
+ 0324                   .dbline -1
+ 0324                   .dbline 186
+ 0324           ; 
+ 0324           ; 
+ 0324           ; void Delay()
+ 0324           ; {
+ 0324                   .dbline 189
+ 0324           ;       unsigned char a, b;
+ 0324           ; 
+ 0324           ;       for (a = 1; a; a++)
+ 0324 01E0              ldi R16,1
+ 0326 06C0              rjmp L74
+ 0328           L71:
+ 0328                   .dbline 190
+ 0328 21E0              ldi R18,1
+ 032A 01C0              rjmp L78
+ 032C           L75:
+ 032C                   .dbline 190
+ 032C           L76:
+ 032C                   .dbline 190
+ 032C 2395              inc R18
+ 032E           L78:
+ 032E                   .dbline 190
+ 032E 2223              tst R18
+ 0330 E9F7              brne L75
+ 0332           L72:
+ 0332                   .dbline 189
+ 0332 0395              inc R16
+ 0334           L74:
+ 0334                   .dbline 189
+ 0334 0023              tst R16
+ 0336 C1F7              brne L71
+ 0338                   .dbline -2
+ 0338                   .dbline 191
+ 0338           ;               for (b = 1; b; b++);
+ 0338           ; }
+ 0338           L70:
+ 0338                   .dbline 0 ; func end
+ 0338 0895              ret
+ 033A                   .dbsym r a 16 c
+ 033A                   .dbsym r b 18 c
+ 033A                   .dbend
+ 033A                   .dbfunc e main _main fI
+                        .area func_lit(rom, con, rel)
+ 0000           L109:
+ 0000 2D03              .word `L85
+ 0002 2D03              .word `L85
+ 0004 2D03              .word `L85
+ 0006 2D03              .word `L85
+ 0008 2D03              .word `L85
+ 000A 2D03              .word `L85
+ 000C 2D03              .word `L85
+ 000E 2D03              .word `L85
+ 0010 E401              .word `L101
+ 0012 2D03              .word `L85
+ 0014 F501              .word `L103
+ 0016 2D03              .word `L85
+ 0018 0602              .word `L105
+ 001A 2D03              .word `L85
+ 001C 2D03              .word `L85
+ 001E 1402              .word `L108
+                        .area text(rom, con, rel)
+ 033A                   .dbfile C:\projects\SynthMod\100-1001\firmware\midi.c
+ 033A           ;    currentnote -> R12,R13
+ 033A           ;              v -> R14,R15
+ 033A           ;       nextnote -> y+12
+ 033A           ;           chan -> y+11
+ 033A           ;          state -> y+10
+ 033A           ;            cmd -> y+9
+ 033A           ;              c -> y+8
+                        .even
+ 033A           _main::
+ 033A 2E97              sbiw R28,14
+ 033C                   .dbline -1
+ 033C                   .dbline 227
+ 033C           ; 
+ 033C           ; enum {IDLE,NOTE0,NOTE1};
+ 033C           ; 
+ 033C           ; #define SYSEX                 0xf0
+ 033C           ; #define SYSCOMUNDEF           0xf1
+ 033C           ; #define SYSCOMSONGPOS 0xf2
+ 033C           ; #define SYSCOMSONGSEL 0xf3
+ 033C           ; #define SYSCOMUNDEF1  0xf4
+ 033C           ; #define SYSCOMUNDEF2  0xf5
+ 033C           ; #define SYSCOMTUNEREQ 0xf6
+ 033C           ; #define SYSEXEND              0xf7
+ 033C           ; #define SYSRTCLOCK            0xf8
+ 033C           ; #define SYSRTUNDEF            0xf9
+ 033C           ; #define SYSRTSTART            0xfa
+ 033C           ; #define SYSRTCONTINUE 0xfb
+ 033C           ; #define SYSRTSTOP             0xfc
+ 033C           ; #define SYSRTUNDEF1           0xfd
+ 033C           ; #define SYSRTACTIVESEN        0xfe
+ 033C           ; #define SYSRTRESET            0xff
+ 033C           ; 
+ 033C           ; #define NOTEON        0x90
+ 033C           ; #define NOTEOFF       0x80
+ 033C           ; #define NOTEPRES      0xa0            //note pressure
+ 033C           ; #define CHANPRES      0xb0            //channel pressure
+ 033C           ; #define CONTROL       0xd0                    //control change
+ 033C           ; #define WHEEL 0xe0                    //pitch wheel change
+ 033C           ; #define PATCH 0xc0                    //patch change
+ 033C           ; 
+ 033C           ; 
+ 033C           ; #define MIDI_CLOCK    0x80
+ 033C           ; #define MIDI_START    0x40
+ 033C           ; #define MIDI_RESET    0x20
+ 033C           ; #define MIDI_GATE     0x01
+ 033C           ; 
+ 033C           ; main()
+ 033C           ; {
+ 033C                   .dbline 235
+ 033C           ;       int currentnote,nextnote;
+ 033C           ;       char c;
+ 033C           ;       char cmd;
+ 033C           ;       char chan;
+ 033C           ;       char state;
+ 033C           ;       int v;
+ 033C           ; 
+ 033C           ;       InitSPI();              /*      initialize the SPI port */
+ 033C 00D0              rcall _InitSPI
+ 033E                   .dbline 236
+ 033E           ;       InitTimer();    //initialize real clock timer
+ 033E E8DF              rcall _InitTimer
+ 0340                   .dbline 237
+ 0340           ;       InitUart(BAUD_MIDI);
+ 0340 0FE0              ldi R16,15
+ 0342 10E0              ldi R17,0
+ 0344 5DDE              rcall _InitUart
+ 0346                   .dbline 238
+ 0346           ;       EnableRxIRQ();  /*      enable receive interrupt        */
+ 0346 A3DE              rcall _EnableRxIRQ
+ 0348                   .dbline 239
+ 0348           ;       EnableTimerIrq();
+ 0348 DBDF              rcall _EnableTimerIrq
+ 034A                   .dbline 240
+ 034A           ;       GateShadow = 0;
+ 034A 2224              clr R2
+ 034C 20925200          sts _GateShadow,R2
+ 0350                   .dbline 241
+ 0350           ;       GATE_PORT = GateShadow; /*      set all outputs to zero */
+ 0350 209200C0          sts 49152,R2
+ 0354                   .dbline 242
+ 0354           ;       LED_PORT = ~GateShadow;
+ 0354 2094              com R2
+ 0356 209200C4          sts 50176,R2
+ 035A                   .dbline 243
+ 035A           ;       Enable();               /*      enable global interrupts        */
+ 035A 97DE              rcall _Enable
+ 035C 7EC1              rjmp L82
+ 035E           L81:
+ 035E                   .dbline 246
+ 035E           ;       
+ 035E           ;       while(1)
+ 035E           ;       {
+ 035E                   .dbline 247
+ 035E           ;               c = GetC();
+ 035E 29DF              rcall _GetC
+ 0360 0887              std y+8,R16
+ 0362                   .dbline 248
+ 0362           ;               if(c & 0x080)   //is it a command?
+ 0362 002E              mov R0,R16
+ 0364 07FF              sbrs R16,7
+ 0366 71C0              rjmp L84
+ 0368                   .dbline 249
+ 0368           ;               {
+ 0368                   .dbline 250
+ 0368           ;                       if(c < 0x0f0)
+ 0368 802D              mov R24,R0
+ 036A 003F              cpi R16,240
+ 036C 88F4              brsh L86
+ 036E                   .dbline 251
+ 036E           ;                       {
+ 036E                   .dbline 253
+ 036E           ;                               //process this stuff, dispose of everything else
+ 036E           ;                               cmd = (char)(c & 0xf0);
+ 036E 9927              clr R25
+ 0370 807F              andi R24,240
+ 0372 9070              andi R25,0
+ 0374 8987              std y+9,R24
+ 0376                   .dbline 254
+ 0376           ;                               chan = (char)(c & 0x0f);
+ 0376 8885              ldd R24,y+8
+ 0378 9927              clr R25
+ 037A 8F70              andi R24,15
+ 037C 9070              andi R25,0
+ 037E 8B87              std y+11,R24
+ 0380                   .dbline 255
+ 0380           ;                               if(cmd == NOTEON)
+ 0380 8985              ldd R24,y+9
+ 0382 8039              cpi R24,144
+ 0384 09F0              breq X15
+ 0386 69C1              rjmp L85
+ 0388           X15:
+ 0388                   .dbline 256
+ 0388           ;                                       state = NOTE0;
+ 0388 0024              clr R0
+ 038A 0394              inc R0
+ 038C 0A86              std y+10,R0
+ 038E                   .dbline 257
+ 038E           ;                       }
+ 038E 65C1              rjmp L85
+ 0390           L86:
+ 0390                   .dbline 259
+ 0390           ;                       else
+ 0390           ;                       {
+ 0390                   .dbline 260
+ 0390           ;                               switch(c)
+ 0390 A884              ldd R10,y+8
+ 0392 BB24              clr R11
+ 0394 8A2D              mov R24,R10
+ 0396 9B2D              mov R25,R11
+ 0398 803F              cpi R24,240
+ 039A E0E0              ldi R30,0
+ 039C 9E07              cpc R25,R30
+ 039E 0CF4              brge X16
+ 03A0 5CC1              rjmp L85
+ 03A2           X16:
+ 03A2 8FEF              ldi R24,255
+ 03A4 8A15              cp R24,R10
+ 03A6 9B05              cpc R25,R11
+ 03A8 0CF4              brge X17
+ 03AA 57C1              rjmp L85
+ 03AC           X17:
+ 03AC 80E0              ldi R24,<L109
+ 03AE 90E0              ldi R25,>L109
+ 03B0 0A2D              mov R16,R10
+ 03B2 1B2D              mov R17,R11
+ 03B4 005F              subi R16,240
+ 03B6 1040              sbci R17,0
+ 03B8 000F              lsl R16
+ 03BA 111F              rol R17
+ 03BC 080F              add R16,R24
+ 03BE 191F              adc R17,R25
+ 03C0 00D0              rcall lpm16
+ 03C2 E02F              mov R30,R16
+ 03C4 F12F              mov R31,R17
+ 03C6 0994              ijmp
+ 03C8           X3:
+ 03C8                   .dbline 261
+ 03C8           ;                               {
+ 03C8                   .dbline 263
+ 03C8           ;                                       case SYSEX:
+ 03C8           ;                                               break;
+ 03C8                   .dbline 265
+ 03C8           ;                                       case SYSCOMUNDEF:
+ 03C8           ;                                               break;
+ 03C8                   .dbline 267
+ 03C8           ;                                       case SYSCOMSONGPOS:
+ 03C8           ;                                               break;
+ 03C8                   .dbline 269
+ 03C8           ;                                       case SYSCOMSONGSEL:
+ 03C8           ;                                               break;
+ 03C8                   .dbline 271
+ 03C8           ;                                       case SYSCOMUNDEF1:
+ 03C8           ;                                               break;
+ 03C8                   .dbline 273
+ 03C8           ;                                       case SYSCOMUNDEF2:
+ 03C8           ;                                               break;
+ 03C8                   .dbline 275
+ 03C8           ;                                       case SYSCOMTUNEREQ:
+ 03C8           ;                                               break;
+ 03C8                   .dbline 277
+ 03C8           ;                                       case SYSEXEND:
+ 03C8           ;                                               break;
+ 03C8           L101:
+ 03C8                   .dbline 279
+ 03C8           ;                                       case SYSRTCLOCK:
+ 03C8           ;                                               Disable();
+ 03C8 5EDE              rcall _Disable
+ 03CA                   .dbline 280
+ 03CA           ;                                               GateShadow ^= MIDI_CLOCK;       /*      toggle these bits       */
+ 03CA 80E8              ldi R24,128
+ 03CC 90E0              ldi R25,0
+ 03CE 20905200          lds R2,_GateShadow
+ 03D2 3324              clr R3
+ 03D4 2826              eor R2,R24
+ 03D6 3926              eor R3,R25
+ 03D8 20925200          sts _GateShadow,R2
+ 03DC                   .dbline 281
+ 03DC           ;                                               GATE_PORT = GateShadow;
+ 03DC 209200C0          sts 49152,R2
+ 03E0                   .dbline 282
+ 03E0           ;                                               LED_PORT = ~GateShadow;
+ 03E0 2094              com R2
+ 03E2 209200C4          sts 50176,R2
+ 03E6                   .dbline 283
+ 03E6           ;                                               Enable();
+ 03E6 51DE              rcall _Enable
+ 03E8                   .dbline 284
+ 03E8           ;                                               break;
+ 03E8 38C1              rjmp L85
+ 03EA           X4:
+ 03EA                   .dbline 286
+ 03EA           ;                                       case SYSRTUNDEF:
+ 03EA           ;                                               break;
+ 03EA           L103:
+ 03EA                   .dbline 288
+ 03EA           ;                                       case SYSRTSTART:
+ 03EA           ;                                               Disable();
+ 03EA 4DDE              rcall _Disable
+ 03EC                   .dbline 289
+ 03EC           ;                                               GateShadow |= MIDI_START;
+ 03EC 80915200          lds R24,_GateShadow
+ 03F0 8064              ori R24,64
+ 03F2 80935200          sts _GateShadow,R24
+ 03F6                   .dbline 290
+ 03F6           ;                                               GateShadow &= ~MIDI_RESET;
+ 03F6 8F7D              andi R24,223
+ 03F8 80935200          sts _GateShadow,R24
+ 03FC                   .dbline 291
+ 03FC           ;                                               GATE_PORT = GateShadow;
+ 03FC 282E              mov R2,R24
+ 03FE 209200C0          sts 49152,R2
+ 0402                   .dbline 292
+ 0402           ;                                               LED_PORT = ~GateShadow;
+ 0402 2094              com R2
+ 0404 209200C4          sts 50176,R2
+ 0408                   .dbline 293
+ 0408           ;                                               Enable();                               
+ 0408 40DE              rcall _Enable
+ 040A                   .dbline 294
+ 040A           ;                                               break;
+ 040A 27C1              rjmp L85
+ 040C           X5:
+ 040C                   .dbline 296
+ 040C           ;                                       case SYSRTCONTINUE:
+ 040C           ;                                               break;
+ 040C           L105:
+ 040C                   .dbline 298
+ 040C           ;                                       case SYSRTSTOP:
+ 040C           ;                                               Disable();
+ 040C 3CDE              rcall _Disable
+ 040E                   .dbline 299
+ 040E           ;                                               GateShadow &= ~MIDI_START;
+ 040E 80915200          lds R24,_GateShadow
+ 0412 8F7B              andi R24,191
+ 0414 80935200          sts _GateShadow,R24
+ 0418                   .dbline 300
+ 0418           ;                                               GATE_PORT = GateShadow;
+ 0418 282E              mov R2,R24
+ 041A 209200C0          sts 49152,R2
+ 041E                   .dbline 301
+ 041E           ;                                               LED_PORT = ~GateShadow;
+ 041E 2094              com R2
+ 0420 209200C4          sts 50176,R2
+ 0424                   .dbline 302
+ 0424           ;                                               Enable();               
+ 0424 32DE              rcall _Enable
+ 0426                   .dbline 303
+ 0426           ;                                               break;
+ 0426 19C1              rjmp L85
+ 0428           X6:
+ 0428                   .dbline 305
+ 0428           ;                                       case SYSRTUNDEF1:
+ 0428           ;                                               break;
+ 0428                   .dbline 307
+ 0428           ;                                       case SYSRTACTIVESEN:
+ 0428           ;                                               break;
+ 0428           L108:
+ 0428                   .dbline 309
+ 0428           ;                                       case SYSRTRESET:
+ 0428           ;                                               Disable();
+ 0428 2EDE              rcall _Disable
+ 042A                   .dbline 310
+ 042A           ;                                               GateShadow &= ~MIDI_START;
+ 042A 80915200          lds R24,_GateShadow
+ 042E 8F7B              andi R24,191
+ 0430 80935200          sts _GateShadow,R24
+ 0434                   .dbline 311
+ 0434           ;                                               GateShadow |= MIDI_RESET;
+ 0434 8062              ori R24,32
+ 0436 80935200          sts _GateShadow,R24
+ 043A                   .dbline 312
+ 043A           ;                                               GATE_PORT = GateShadow;
+ 043A 282E              mov R2,R24
+ 043C 209200C0          sts 49152,R2
+ 0440                   .dbline 313
+ 0440           ;                                               LED_PORT = ~GateShadow;
+ 0440 2094              com R2
+ 0442 209200C4          sts 50176,R2
+ 0446                   .dbline 314
+ 0446           ;                                               Enable();               
+ 0446 21DE              rcall _Enable
+ 0448                   .dbline 315
+ 0448           ;                                               break;
+ 0448                   .dbline 317
+ 0448           ;                               }       //end of swtich(c)
+ 0448           ;                       }       //end of if(c < 0xf0)
+ 0448                   .dbline 319
+ 0448           ; 
+ 0448           ;               }
+ 0448 08C1              rjmp L85
+ 044A           L84:
+ 044A                   .dbline 321
+ 044A           ;               else    // if(c & 0x080)
+ 044A           ;               {
+ 044A                   .dbline 322
+ 044A           ;                       switch(cmd)
+ 044A 6985              ldd R22,y+9
+ 044C 7727              clr R23
+ 044E 603B              cpi R22,176
+ 0450 E0E0              ldi R30,0
+ 0452 7E07              cpc R23,R30
+ 0454 09F4              brne X18
+ 0456 01C1              rjmp L111
+ 0458           X18:
+ 0458 80EB              ldi R24,176
+ 045A 90E0              ldi R25,0
+ 045C 8617              cp R24,R22
+ 045E 9707              cpc R25,R23
+ 0460 ACF0              brlt L154
+ 0462           L153:
+ 0462 6039              cpi R22,144
+ 0464 E0E0              ldi R30,0
+ 0466 7E07              cpc R23,R30
+ 0468 09F4              brne X19
+ 046A 51C0              rjmp L121
+ 046C           X19:
+ 046C 80E9              ldi R24,144
+ 046E 90E0              ldi R25,0
+ 0470 8617              cp R24,R22
+ 0472 9707              cpc R25,R23
+ 0474 2CF0              brlt L156
+ 0476           L155:
+ 0476 6038              cpi R22,128
+ 0478 E0E0              ldi R30,0
+ 047A 7E07              cpc R23,R30
+ 047C E9F0              breq L113
+ 047E EDC0              rjmp L110
+ 0480           L156:
+ 0480 603A              cpi R22,160
+ 0482 E0E0              ldi R30,0
+ 0484 7E07              cpc R23,R30
+ 0486 09F4              brne X20
+ 0488 91C0              rjmp L133
+ 048A           X20:
+ 048A E7C0              rjmp L110
+ 048C           L154:
+ 048C 603D              cpi R22,208
+ 048E E0E0              ldi R30,0
+ 0490 7E07              cpc R23,R30
+ 0492 09F4              brne X21
+ 0494 A1C0              rjmp L140
+ 0496           X21:
+ 0496 80ED              ldi R24,208
+ 0498 90E0              ldi R25,0
+ 049A 8617              cp R24,R22
+ 049C 9707              cpc R25,R23
+ 049E 34F0              brlt L158
+ 04A0           L157:
+ 04A0 603C              cpi R22,192
+ 04A2 E0E0              ldi R30,0
+ 04A4 7E07              cpc R23,R30
+ 04A6 09F4              brne X22
+ 04A8 D5C0              rjmp L152
+ 04AA           X22:
+ 04AA D7C0              rjmp L110
+ 04AC           L158:
+ 04AC 603E              cpi R22,224
+ 04AE E0E0              ldi R30,0
+ 04B0 7E07              cpc R23,R30
+ 04B2 09F4              brne X23
+ 04B4 A7C0              rjmp L146
+ 04B6           X23:
+ 04B6 D1C0              rjmp L110
+ 04B8           X7:
+ 04B8                   .dbline 323
+ 04B8           ;                       {
+ 04B8           L113:
+ 04B8                   .dbline 325
+ 04B8           ;                               case NOTEOFF:
+ 04B8           ;                                       switch(state)
+ 04B8 4A85              ldd R20,y+10
+ 04BA 5527              clr R21
+ 04BC 4130              cpi R20,1
+ 04BE E0E0              ldi R30,0
+ 04C0 5E07              cpc R21,R30
+ 04C2 29F0              breq L117
+ 04C4 4230              cpi R20,2
+ 04C6 E0E0              ldi R30,0
+ 04C8 5E07              cpc R21,R30
+ 04CA 59F0              breq L118
+ 04CC C6C0              rjmp L111
+ 04CE           X8:
+ 04CE                   .dbline 326
+ 04CE           ;                                       {
+ 04CE           L117:
+ 04CE                   .dbline 328
+ 04CE           ;                                               case NOTE0:
+ 04CE           ;                                                       nextnote = (int)c << 5;
+ 04CE 25E0              ldi R18,5
+ 04D0 30E0              ldi R19,0
+ 04D2 0885              ldd R16,y+8
+ 04D4 1127              clr R17
+ 04D6 00D0              rcall lsl16
+ 04D8 1D87              std y+13,R17
+ 04DA 0C87              std y+12,R16
+ 04DC                   .dbline 329
+ 04DC           ;                                                       state = NOTE1;
+ 04DC 82E0              ldi R24,2
+ 04DE 8A87              std y+10,R24
+ 04E0                   .dbline 330
+ 04E0           ;                                                       break;
+ 04E0 BCC0              rjmp L111
+ 04E2           L118:
+ 04E2                   .dbline 332
+ 04E2           ;                                               case NOTE1:
+ 04E2           ;                                                       if(nextnote == currentnote)
+ 04E2 0C84              ldd R0,y+12
+ 04E4 1D84              ldd R1,y+13
+ 04E6 0C14              cp R0,R12
+ 04E8 1D04              cpc R1,R13
+ 04EA 69F4              brne L119
+ 04EC                   .dbline 333
+ 04EC           ;                                                       {
+ 04EC                   .dbline 334
+ 04EC           ;                                                               Disable();
+ 04EC CCDD              rcall _Disable
+ 04EE                   .dbline 335
+ 04EE           ;                                                               GateShadow &= ~MIDI_GATE;
+ 04EE 80915200          lds R24,_GateShadow
+ 04F2 8E7F              andi R24,254
+ 04F4 80935200          sts _GateShadow,R24
+ 04F8                   .dbline 336
+ 04F8           ;                                                               GATE_PORT = GateShadow;
+ 04F8 282E              mov R2,R24
+ 04FA 209200C0          sts 49152,R2
+ 04FE                   .dbline 337
+ 04FE           ;                                                               LED_PORT = ~GateShadow;
+ 04FE 2094              com R2
+ 0500 209200C4          sts 50176,R2
+ 0504                   .dbline 338
+ 0504           ;                                                               Enable();
+ 0504 C2DD              rcall _Enable
+ 0506                   .dbline 339
+ 0506           ;                                                       }
+ 0506           L119:
+ 0506                   .dbline 340
+ 0506           ;                                                       state = NOTE0;
+ 0506 0024              clr R0
+ 0508 0394              inc R0
+ 050A 0A86              std y+10,R0
+ 050C                   .dbline 341
+ 050C           ;                                                       break;
+ 050C                   .dbline 343
+ 050C           ;                                       }
+ 050C           ;                                       break;
+ 050C A6C0              rjmp L111
+ 050E           L121:
+ 050E                   .dbline 345
+ 050E           ;                               case NOTEON:
+ 050E           ;                                       switch(state)
+ 050E 2A84              ldd R2,y+10
+ 0510 3324              clr R3
+ 0512 3982              std y+1,R3
+ 0514 2882              std y+0,R2
+ 0516 822D              mov R24,R2
+ 0518 932D              mov R25,R3
+ 051A 8130              cpi R24,1
+ 051C E0E0              ldi R30,0
+ 051E 9E07              cpc R25,R30
+ 0520 29F0              breq L125
+ 0522 8230              cpi R24,2
+ 0524 E0E0              ldi R30,0
+ 0526 9E07              cpc R25,R30
+ 0528 59F0              breq L126
+ 052A 97C0              rjmp L111
+ 052C           X9:
+ 052C                   .dbline 346
+ 052C           ;                                       {
+ 052C           L125:
+ 052C                   .dbline 348
+ 052C           ;                                               case NOTE0:
+ 052C           ;                                                       nextnote = (int)c << 5;
+ 052C 25E0              ldi R18,5
+ 052E 30E0              ldi R19,0
+ 0530 0885              ldd R16,y+8
+ 0532 1127              clr R17
+ 0534 00D0              rcall lsl16
+ 0536 1D87              std y+13,R17
+ 0538 0C87              std y+12,R16
+ 053A                   .dbline 349
+ 053A           ;                                                       state = NOTE1;
+ 053A 82E0              ldi R24,2
+ 053C 8A87              std y+10,R24
+ 053E                   .dbline 350
+ 053E           ;                                                       break;
+ 053E 8DC0              rjmp L111
+ 0540           L126:
+ 0540                   .dbline 352
+ 0540           ;                                               case NOTE1:
+ 0540           ;                                                       Disable();
+ 0540 A2DD              rcall _Disable
+ 0542                   .dbline 353
+ 0542           ;                                                       if(c > 0)
+ 0542 2224              clr R2
+ 0544 0884              ldd R0,y+8
+ 0546 2014              cp R2,R0
+ 0548 D8F4              brsh L127
+ 054A                   .dbline 354
+ 054A           ;                                                       {
+ 054A                   .dbline 355
+ 054A           ;                                                               currentnote = nextnote;
+ 054A CC84              ldd R12,y+12
+ 054C DD84              ldd R13,y+13
+ 054E                   .dbline 356
+ 054E           ;                                                               SendData(currentnote,0);
+ 054E 2227              clr R18
+ 0550 3327              clr R19
+ 0552 0C2D              mov R16,R12
+ 0554 1D2D              mov R17,R13
+ 0556 00D0              rcall _SendData
+ 0558                   .dbline 357
+ 0558           ;                                                               if(GateShadow & MIDI_GATE)      //is gate already set?
+ 0558 20905200          lds R2,_GateShadow
+ 055C 20FE              sbrs R2,0
+ 055E 0AC0              rjmp L129
+ 0560                   .dbline 358
+ 0560           ;                                                               {
+ 0560                   .dbline 359
+ 0560           ;                                                                       GateShadow &= ~MIDI_GATE;       //retrigger gate
+ 0560 822D              mov R24,R2
+ 0562 8E7F              andi R24,254
+ 0564 80935200          sts _GateShadow,R24
+ 0568                   .dbline 360
+ 0568           ;                                                                       GATE_PORT = GateShadow;
+ 0568 282E              mov R2,R24
+ 056A 209200C0          sts 49152,R2
+ 056E                   .dbline 361
+ 056E           ;                                                                       LED_PORT = ~GateShadow;
+ 056E 2094              com R2
+ 0570 209200C4          sts 50176,R2
+ 0574                   .dbline 362
+ 0574           ;                                                               }
+ 0574           L129:
+ 0574                   .dbline 363
+ 0574           ;                                                               GateShadow |= MIDI_GATE;
+ 0574 80915200          lds R24,_GateShadow
+ 0578 8160              ori R24,1
+ 057A 80935200          sts _GateShadow,R24
+ 057E                   .dbline 364
+ 057E           ;                                                       }
+ 057E 0AC0              rjmp L128
+ 0580           L127:
+ 0580                   .dbline 366
+ 0580           ;                                                       else
+ 0580           ;                                                       {
+ 0580                   .dbline 367
+ 0580           ;                                                               if(currentnote == nextnote)
+ 0580 0C84              ldd R0,y+12
+ 0582 1D84              ldd R1,y+13
+ 0584 C014              cp R12,R0
+ 0586 D104              cpc R13,R1
+ 0588 29F4              brne L131
+ 058A                   .dbline 368
+ 058A           ;                                                               {
+ 058A                   .dbline 369
+ 058A           ;                                                                       GateShadow &= ~MIDI_GATE;
+ 058A 80915200          lds R24,_GateShadow
+ 058E 8E7F              andi R24,254
+ 0590 80935200          sts _GateShadow,R24
+ 0594                   .dbline 370
+ 0594           ;                                                               }
+ 0594           L131:
+ 0594                   .dbline 371
+ 0594           ;                                                       }
+ 0594           L128:
+ 0594                   .dbline 372
+ 0594           ;                                                       GATE_PORT = GateShadow;
+ 0594 20905200          lds R2,_GateShadow
+ 0598 209200C0          sts 49152,R2
+ 059C                   .dbline 373
+ 059C           ;                                                       LED_PORT = ~GateShadow;
+ 059C 2094              com R2
+ 059E 209200C4          sts 50176,R2
+ 05A2                   .dbline 374
+ 05A2           ;                                                       Enable();
+ 05A2 73DD              rcall _Enable
+ 05A4                   .dbline 375
+ 05A4           ;                                                       state = NOTE0;
+ 05A4 0024              clr R0
+ 05A6 0394              inc R0
+ 05A8 0A86              std y+10,R0
+ 05AA                   .dbline 376
+ 05AA           ;                                                       break;
+ 05AA                   .dbline 378
+ 05AA           ;                                               default:
+ 05AA           ;                                                       break;
+ 05AA                   .dbline 380
+ 05AA           ;                                       }
+ 05AA           ;                                       break;
+ 05AA 57C0              rjmp L111
+ 05AC           L133:
+ 05AC                   .dbline 382
+ 05AC           ;                               case NOTEPRES:  //note pressure
+ 05AC           ;                                       switch(state)
+ 05AC 2A84              ldd R2,y+10
+ 05AE 3324              clr R3
+ 05B0 3B82              std y+3,R3
+ 05B2 2A82              std y+2,R2
+ 05B4 822D              mov R24,R2
+ 05B6 932D              mov R25,R3
+ 05B8 8130              cpi R24,1
+ 05BA E0E0              ldi R30,0
+ 05BC 9E07              cpc R25,R30
+ 05BE 29F0              breq L137
+ 05C0 8230              cpi R24,2
+ 05C2 E0E0              ldi R30,0
+ 05C4 9E07              cpc R25,R30
+ 05C6 21F0              breq L138
+ 05C8 48C0              rjmp L111
+ 05CA           X10:
+ 05CA                   .dbline 383
+ 05CA           ;                                       {
+ 05CA           L137:
+ 05CA                   .dbline 385
+ 05CA           ;                                               case NOTE0:
+ 05CA           ;                                                       state = NOTE1;
+ 05CA 82E0              ldi R24,2
+ 05CC 8A87              std y+10,R24
+ 05CE                   .dbline 386
+ 05CE           ;                                                       break;
+ 05CE 45C0              rjmp L111
+ 05D0           L138:
+ 05D0                   .dbline 388
+ 05D0           ;                                               case NOTE1:
+ 05D0           ;                                                       state = NOTE0;
+ 05D0 0024              clr R0
+ 05D2 0394              inc R0
+ 05D4 0A86              std y+10,R0
+ 05D6                   .dbline 389
+ 05D6           ;                                                       break;
+ 05D6                   .dbline 391
+ 05D6           ;                                       }
+ 05D6           ;                                       break;
+ 05D6 41C0              rjmp L111
+ 05D8           X11:
+ 05D8                   .dbline 393
+ 05D8           ;                               case CHANPRES:          //channel pressure
+ 05D8           ;                                       break;
+ 05D8           L140:
+ 05D8                   .dbline 395
+ 05D8           ;                               case CONTROL:                   //control change
+ 05D8           ;                                       switch(state)
+ 05D8 2A84              ldd R2,y+10
+ 05DA 3324              clr R3
+ 05DC 3D82              std y+5,R3
+ 05DE 2C82              std y+4,R2
+ 05E0 822D              mov R24,R2
+ 05E2 932D              mov R25,R3
+ 05E4 8130              cpi R24,1
+ 05E6 E0E0              ldi R30,0
+ 05E8 9E07              cpc R25,R30
+ 05EA 29F0              breq L144
+ 05EC 8230              cpi R24,2
+ 05EE E0E0              ldi R30,0
+ 05F0 9E07              cpc R25,R30
+ 05F2 21F0              breq L145
+ 05F4 32C0              rjmp L111
+ 05F6           X12:
+ 05F6                   .dbline 396
+ 05F6           ;                                       {
+ 05F6           L144:
+ 05F6                   .dbline 398
+ 05F6           ;                                               case NOTE0:
+ 05F6           ;                                                       state = NOTE1;
+ 05F6 82E0              ldi R24,2
+ 05F8 8A87              std y+10,R24
+ 05FA                   .dbline 399
+ 05FA           ;                                                       break;
+ 05FA 2FC0              rjmp L111
+ 05FC           L145:
+ 05FC                   .dbline 401
+ 05FC           ;                                               case NOTE1:
+ 05FC           ;                                                       state = NOTE0;
+ 05FC 0024              clr R0
+ 05FE 0394              inc R0
+ 0600 0A86              std y+10,R0
+ 0602                   .dbline 402
+ 0602           ;                                                       break;
+ 0602                   .dbline 404
+ 0602           ;                                       }
+ 0602           ;                                       break;
+ 0602 2BC0              rjmp L111
+ 0604           L146:
+ 0604                   .dbline 406
+ 0604           ;                               case WHEEL:                     //pitch wheel change
+ 0604           ;                                       switch(state)
+ 0604 2A84              ldd R2,y+10
+ 0606 3324              clr R3
+ 0608 3F82              std y+7,R3
+ 060A 2E82              std y+6,R2
+ 060C 822D              mov R24,R2
+ 060E 932D              mov R25,R3
+ 0610 8130              cpi R24,1
+ 0612 E0E0              ldi R30,0
+ 0614 9E07              cpc R25,R30
+ 0616 29F0              breq L150
+ 0618 8230              cpi R24,2
+ 061A E0E0              ldi R30,0
+ 061C 9E07              cpc R25,R30
+ 061E 31F0              breq L151
+ 0620 1CC0              rjmp L111
+ 0622           X13:
+ 0622                   .dbline 407
+ 0622           ;                                       {
+ 0622           L150:
+ 0622                   .dbline 409
+ 0622           ;                                               case NOTE0:
+ 0622           ;                                                       v = ((int)c);
+ 0622 E884              ldd R14,y+8
+ 0624 FF24              clr R15
+ 0626                   .dbline 410
+ 0626           ;                                                       state = NOTE1;
+ 0626 82E0              ldi R24,2
+ 0628 8A87              std y+10,R24
+ 062A                   .dbline 411
+ 062A           ;                                                       break;
+ 062A 17C0              rjmp L111
+ 062C           L151:
+ 062C                   .dbline 413
+ 062C           ;                                               case NOTE1:
+ 062C           ;                                                       v |= ((int)c)<<7;
+ 062C 27E0              ldi R18,7
+ 062E 30E0              ldi R19,0
+ 0630 0885              ldd R16,y+8
+ 0632 1127              clr R17
+ 0634 00D0              rcall lsl16
+ 0636 E02A              or R14,R16
+ 0638 F12A              or R15,R17
+ 063A                   .dbline 414
+ 063A           ;                                                       v >>= 2;        //12 bits;
+ 063A F594              asr R15
+ 063C E794              ror R14
+ 063E F594              asr R15
+ 0640 E794              ror R14
+ 0642                   .dbline 416
+ 0642           ;                       //                              v ^= 0x0800;
+ 0642           ;                                                       SendData(v,1);
+ 0642 21E0              ldi R18,1
+ 0644 30E0              ldi R19,0
+ 0646 0E2D              mov R16,R14
+ 0648 1F2D              mov R17,R15
+ 064A 00D0              rcall _SendData
+ 064C                   .dbline 417
+ 064C           ;                                                       state = NOTE0;
+ 064C 0024              clr R0
+ 064E 0394              inc R0
+ 0650 0A86              std y+10,R0
+ 0652                   .dbline 418
+ 0652           ;                                                       break;
+ 0652                   .dbline 420
+ 0652           ;                                       }
+ 0652           ;                                       break;
+ 0652 03C0              rjmp L111
+ 0654           L152:
+ 0654                   .dbline 422
+ 0654           ;                               case PATCH:                     //patch change
+ 0654           ;                                       state = NOTE0;
+ 0654 0024              clr R0
+ 0656 0394              inc R0
+ 0658 0A86              std y+10,R0
+ 065A                   .dbline 423
+ 065A           ;                                       break;
+ 065A           L110:
+ 065A           L111:
+ 065A                   .dbline 425
+ 065A           ;                       }       //end of switch(cmd)
+ 065A           ;               }       //end of if(c & 0x080)
+ 065A           L85:
+ 065A                   .dbline 427
+ 065A           L82:
+ 065A                   .dbline 245
+ 065A 81CE              rjmp L81
+ 065C           X14:
+ 065C                   .dbline 428
+ 065C           ; 
+ 065C           ;       }       //end of while(1) loop
+ 065C           ;       return 0;
+ 065C 0027              clr R16
+ 065E 1127              clr R17
+ 0660                   .dbline -2
+ 0660           L80:
+ 0660 2E96              adiw R28,14
+ 0662                   .dbline 0 ; func end
+ 0662 0895              ret
+ 0664                   .dbsym r currentnote 12 I
+ 0664                   .dbsym r v 14 I
+ 0664                   .dbsym l nextnote 12 I
+ 0664                   .dbsym l chan 11 c
+ 0664                   .dbsym l state 10 c
+ 0664                   .dbsym l cmd 9 c
+ 0664                   .dbsym l c 8 c
+ 0664                   .dbend
+                        .area bss(ram, con, rel)
+ 0000                   .dbfile C:\projects\SynthMod\100-1001\firmware\midi.c
+ 0000           _CRV::
+ 0000                   .blkb 1
+ 0001                   .dbsym e CRV _CRV c
+ 0001           _Counter::
+ 0001                   .blkb 1
+ 0002                   .dbsym e Counter _Counter c
+ 0002           _rxbuff::
+ 0002                   .blkb 32
+ 0022                   .dbsym e rxbuff _rxbuff A[32:32]c
+ 0022           _rxdesc::
+ 0022                   .blkb 8
+ 002A                   .dbsym e rxdesc _rxdesc X
+ 002A           _txbuff::
+ 002A                   .blkb 32
+ 004A                   .dbsym e txbuff _txbuff A[32:32]c
+ 004A           _txdesc::
+ 004A                   .blkb 8
+ 0052                   .dbsym e txdesc _txdesc X
+ 0052           _GateShadow::
+ 0052                   .blkb 1
+ 0053                   .dbsym e GateShadow _GateShadow c
