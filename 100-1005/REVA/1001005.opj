@@ -1,0 +1,63 @@
+(ExpressProject ""
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (File ".\1001005.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (NoModify))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1005\REVA\1001005.dsn")
+      (Path "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1005\REVA\1001005.dsn"
+         "RootPage")
+      (Select "Design Resources"
+         "C:\Documents and Settings\Jim Patchell\My Documents\projects\SynthMod\100-1005\REVA\1001005.dsn"
+         "RootPage" "PAGE1"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -6 -25 0 200 0 423"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 44 1652 44 694")
+        (Scroll "0 0")
+        (Zoom "100")
+        (Occurrence "/"))
+      (Path
+         "C:\DOCUMENTS AND SETTINGS\JIM PATCHELL\MY DOCUMENTS\PROJECTS\SYNTHMOD\100-1005\REVA\1001005.DSN")
+      (Schematic "RootPage")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 66 1645 66 716")
+        (Scroll "0 0")
+        (Zoom "100")
+        (Occurrence "/mux"))
+      (Path
+         "C:\DOCUMENTS AND SETTINGS\JIM PATCHELL\MY DOCUMENTS\PROJECTS\SYNTHMOD\100-1005\REVA\1001005.DSN")
+      (Schematic "mux")
+      (Page "PAGE1"))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 88 1667 88 738")
+        (Scroll "0 0")
+        (Zoom "100")
+        (Occurrence "/mux/expos"))
+      (Path
+         "C:\DOCUMENTS AND SETTINGS\JIM PATCHELL\MY DOCUMENTS\PROJECTS\SYNTHMOD\100-1005\REVA\1001005.DSN")
+      (Schematic "expos")
+      (Page "PAGE1")))
+  (PartMRUSelector))
