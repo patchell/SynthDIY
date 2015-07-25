@@ -1,0 +1,23 @@
+(ExpressProject ""
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (File ".\cablelib1007.olb"
+      (Type "Schematic Library"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (NoModify))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources" ".\cablelib1007.olb")
+      (Select "Design Resources" ".\cablelib1007.olb" "CABLE SHIELD"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -4 -23 8 208 147 568"))
+      (Tab 0))))

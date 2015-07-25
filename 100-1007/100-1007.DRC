@@ -1,0 +1,32 @@
+Protel Design System Design Rule Check
+PCB File : C:\DOCUME~1\JIMPAT~1\MYDOCU~1\PROJECTS\SYNTHMOD\100-1007\100-1007.PCB
+NET File : c:\docume~1\jimpat~1\mydocu~1\projects\synthmod\100-1007\100-1007.net
+Date     : 1-Feb-2004 
+Time     : 10:27:33
+
+
+Clearances
+  Arc        : 6mil
+  Fill       : 6mil
+  Pad        : 6mil
+  Track      : 6mil
+  Text       : 6mil
+  Via        : 6mil
+  Large Comp : 50mil
+  Small Comp : 20mil
+
+
+Do Missing Component Errors : On
+Do Missing Pin Errors       : Off
+Do Extra Pin Errors         : Off
+Do Extra UnNamed Pin Errors : Off
+Do Extra Net Errors         : On
+Do Extra Component Errors   : Off
+Do Split Net Errors         : On
+Do Clearance Errors         : On
+Do Component Clearances     : Off
+Do Component Pattern Errors : Off
+Do Component Value Errors   : Off
+
+
+Time Elapsed : 00:00:03

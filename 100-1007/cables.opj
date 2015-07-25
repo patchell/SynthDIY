@@ -1,0 +1,58 @@
+(ExpressProject "cables"
+  (ProjectVersion "19981106")
+  (ProjectType "PCB")
+  (Folder "Design Resources"
+    (Folder "Library")
+    (NoModify)
+    (File ".\cables.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x"))
+  (Folder "Outputs")
+  (Folder "Referenced Projects")
+  (PartMRUSelector
+    ("CABLE TWISTED SHIELD"
+      (FullPartName "CABLE TWISTED SHIELD.Normal")
+      (LibraryName "C:\PROJECTS\SYNTHMOD\100-1007\CABLELIB1007.OLB")
+      (DeviceIndex "0"))
+    ("CABLE HEADER 16"
+      (FullPartName "CABLE HEADER 16.Normal")
+      (LibraryName "C:\PROJECTS\SYNTHMOD\100-1007\CABLELIB1007.OLB")
+      (DeviceIndex "0"))
+    ("CABLE HEADER 26"
+      (FullPartName "CABLE HEADER 26.Normal")
+      (LibraryName "C:\PROJECTS\SYNTHMOD\100-1007\CABLELIB1007.OLB")
+      (DeviceIndex "0"))
+    ("CABLE SHIELD"
+      (FullPartName "CABLE SHIELD.Normal")
+      (LibraryName "C:\PROJECTS\ORCADLIBS\SYNTH-DIY.OLB")
+      (DeviceIndex "0"))
+    ("HEADER 13X2"
+      (FullPartName "HEADER 13X2.Normal")
+      (LibraryName "C:\PROGRAM FILES\ORCAD\CAPTURE\LIBRARY\OLDLIBS\DEVICE.OLB")
+      (DeviceIndex "0")))
+  (LastUsedLibraryBrowseDirectory "C:\projects\SynthMod\100-1007")
+  (GlobalState
+    (FileView
+      (Path "Design Resources")
+      (Path "Design Resources" "C:\PROJECTS\SYNTHMOD\100-1007\cables.dsn")
+      (Path "Design Resources" "C:\PROJECTS\SYNTHMOD\100-1007\cables.dsn"
+         "SCHEMATIC1")
+      (Select "Design Resources" "C:\PROJECTS\SYNTHMOD\100-1007\cables.dsn"
+         "SCHEMATIC1" "PAGE1"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -4 -23 9 209 12 437"))
+      (Tab 0))
+    (Doc
+      (Type "COrSchematicDoc")
+      (Frame
+        (Placement "44 0 1 -1 -1 -1 -1 44 866 44 492")
+        (Scroll "0 0")
+        (Zoom "100")
+        (Occurrence "/"))
+      (Path "C:\PROJECTS\SYNTHMOD\100-1007\CABLES.DSN")
+      (Schematic "SCHEMATIC1")
+      (Page "PAGE1"))))
